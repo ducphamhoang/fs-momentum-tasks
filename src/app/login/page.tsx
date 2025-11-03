@@ -3,23 +3,23 @@
 import Link from "next/link";
 import { LoginForm } from "@/features/auth/presentation/LoginForm";
 import { AuthLayout } from "@/features/auth/presentation/AuthLayout";
-import { useAuth } from "@/features/auth/presentation/use-auth.hook";
+import { useUser } from "@/firebase";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Loader } from "@/components/ui/loader";
 
 export default function LoginPage() {
-    const { user, loading } = useAuth();
+    const { user, isUserLoading } = useUser();
     const router = useRouter();
 
     useEffect(() => {
-        if (!loading && user) {
+        if (!isUserLoading && user) {
             router.push('/');
         }
-    }, [user, loading, router]);
+    }, [user, isUserLoading, router]);
 
 
-    if (loading || user) {
+    if (isUserLoading || user) {
       return (
         <div className="flex min-h-screen items-center justify-center">
           <Loader className="h-12 w-12" />

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useAuth } from "@/features/auth/presentation/use-auth.hook";
+import { useUser, useAuth } from "@/firebase";
 import { Button } from "@/components/ui/button";
 import { Icons } from "./icons";
 import {
@@ -13,11 +13,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { auth } from "@/shared/infrastructure/firebase";
 import { LogOut } from "lucide-react";
 
 export function Header() {
-  const { user } = useAuth();
+  const { user } = useUser();
+  const auth = useAuth();
 
   const handleLogout = async () => {
     await auth.signOut();

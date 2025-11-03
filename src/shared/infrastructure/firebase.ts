@@ -11,8 +11,20 @@ const firebaseConfig: FirebaseOptions = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+let app;
+if (!getApps().length) {
+    try {
+        app = initializeApp();
+    } catch (e) {
+        if (process.env.NODE_ENV === "production") {
+            console.warn('Automatic initialization failed. Falling back to firebase config object.', e);
+        }
+        app = initializeApp(firebaseConfig);
+    }
+} else {
+    app = getApp();
+}
+
 const auth = getAuth(app);
 const db = getFirestore(app);
 

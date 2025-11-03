@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuth } from "@/features/auth/presentation/use-auth.hook";
+import { useUser } from "@/firebase";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Header } from "@/shared/presentation/components/Header";
@@ -13,25 +13,25 @@ import Link from "next/link";
 import { Icons } from "@/shared/presentation/components/icons";
 
 export default function Home() {
-  const { user, loading } = useAuth();
+  const { user, isUserLoading } = useUser();
   const router = useRouter();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [tasksLoading, setTasksLoading] = useState(true);
 
   useEffect(() => {
-    if (!loading && user) {
+    if (!isUserLoading && user) {
       getTasksAction()
         .then(setTasks)
         .finally(() => setTasksLoading(false));
     }
-    if (!loading && !user) {
+    if (!isUserLoading && !user) {
         setTasksLoading(false);
     }
-  }, [user, loading, router]);
+  }, [user, isUserLoading, router]);
 
 
   const renderContent = () => {
-    if (loading || (user && tasksLoading)) {
+    if (isUserLoading || (user && tasksLoading)) {
       return (
         <div className="flex flex-1 items-center justify-center">
           <Loader className="h-10 w-10" />

@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { auth, db } from "@/shared/infrastructure/firebase";
+import { useAuth, useFirestore } from "@/firebase";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 
 import { Button } from "@/components/ui/button";
@@ -32,6 +32,8 @@ const formSchema = z.object({
 
 export function SignUpForm() {
   const router = useRouter();
+  const auth = useAuth();
+  const firestore = useFirestore();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
@@ -50,7 +52,8 @@ export function SignUpForm() {
       const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
 
-      await setDoc(doc(db, "users", user.uid), {
+      await setDoc(doc(firestore, "users", user.uid), {
+        id: user.uid,
         email: user.email,
         createdAt: serverTimestamp(),
       });
@@ -74,7 +77,8 @@ export function SignUpForm() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       
-      await setDoc(doc(db, "users", user.uid), {
+      await setDoc(doc(firestore, "users", user.uid), {
+        id: user.uid,
         email: user.email,
         displayName: user.displayName,
         photoURL: user.photoURL,
