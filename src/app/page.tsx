@@ -1,37 +1,37 @@
 "use client";
 
-import { useUser } from "@/firebase";
+import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Header } from "@/shared/presentation/components/Header";
-import { getTasksAction } from "@/features/tasks/application/actions";
 import { type Task } from "@/features/tasks/domain/task";
 import { Dashboard } from "@/features/tasks/presentation/Dashboard";
 import { Loader } from "@/components/ui/loader";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Icons } from "@/shared/presentation/components/icons";
+import { collection, query, orderBy } from "firebase/firestore";
 
 export default function Home() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [tasksLoading, setTasksLoading] = useState(true);
+  const firestore = useFirestore();
+
+  const tasksQuery = useMemoFirebase(() => {
+    if (!user) return null;
+    return query(collection(firestore, "users", user.uid, "tasks"), orderBy("createdAt", "desc"));
+  }, [firestore, user]);
+
+  const { data: tasks, isLoading: tasksLoading, error } = useCollection<Task>(tasksQuery);
 
   useEffect(() => {
-    if (!isUserLoading && user) {
-      getTasksAction()
-        .then(setTasks)
-        .finally(() => setTasksLoading(false));
-    }
     if (!isUserLoading && !user) {
-        setTasksLoading(false);
+      // No user, do nothing, the page will render the public view
     }
   }, [user, isUserLoading, router]);
 
-
   const renderContent = () => {
-    if (isUserLoading || (user && tasksLoading)) {
+    if (isUserLoading) {
       return (
         <div className="flex flex-1 items-center justify-center">
           <Loader className="h-10 w-10" />
@@ -64,14 +64,34 @@ export default function Home() {
         </div>
       );
     }
+    
+    if (tasksLoading) {
+        return (
+          <div className="flex flex-1 items-center justify-center">
+            <Loader className="h-10 w-10" />
+          </div>
+        );
+    }
 
-    return <Dashboard initialTasks={tasks} />;
+    // Sort tasks locally: incomplete first, then by creation date
+    const sortedTasks = [...(tasks || [])].sort((a, b) => {
+        if (a.isCompleted !== b.isCompleted) {
+          return a.isCompleted ? 1 : -1;
+        }
+        // Assuming createdAt is a Firestore Timestamp, convert to millis for comparison
+        const timeA = a.createdAt?.toMillis() || 0;
+        const timeB = b.createdAt?.toMillis() || 0;
+        return timeB - timeA;
+      });
+
+
+    return <Dashboard initialTasks={sortedTasks} />;
   }
 
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
-      <main className="flex-1">
+      <main className="flex-1 flex flex-col">
         {renderContent()}
       </main>
     </div>

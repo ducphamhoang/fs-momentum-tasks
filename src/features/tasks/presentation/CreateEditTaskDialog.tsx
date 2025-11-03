@@ -5,6 +5,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
+import { useFirestore, useUser } from "@/firebase";
+import { addDoc, collection, doc, serverTimestamp, setDoc, Timestamp } from "firebase/firestore";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -42,66 +44,112 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { Loader } from "@/components/ui/loader";
 
-import { CreateTaskSchema, type Task, type CreateTaskInput, type UpdateTaskInput } from "../domain/task";
-import { createTaskAction, updateTaskAction } from "../application/actions";
+import { CreateTaskSchema, type Task, type CreateTaskInput } from "../domain/task";
+import { revalidateTasks } from "../application/actions";
+
 
 interface CreateEditTaskDialogProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   taskToEdit?: Task | null;
-  onTaskCreated?: (task: Task) => void;
-  onTaskUpdated?: (task: Task) => void;
 }
 
 export function CreateEditTaskDialog({
   isOpen,
   setIsOpen,
   taskToEdit,
-  onTaskCreated,
-  onTaskUpdated
 }: CreateEditTaskDialogProps) {
   const { toast } = useToast();
+  const { user } = useUser();
+  const firestore = useFirestore();
   const [isLoading, setIsLoading] = useState(false);
   const isEditMode = !!taskToEdit;
 
   const form = useForm<CreateTaskInput>({
     resolver: zodResolver(CreateTaskSchema),
-    defaultValues: {
-      title: taskToEdit?.title || "",
-      description: taskToEdit?.description || "",
-      importanceLevel: taskToEdit?.importanceLevel || "medium",
-      dueDate: taskToEdit?.dueDate ? new Date(taskToEdit.dueDate) : undefined,
-      startTime: taskToEdit?.startTime || "",
-      endTime: taskToEdit?.endTime || "",
-      timeEstimate: taskToEdit?.timeEstimate || "",
+    defaultValues: isEditMode && taskToEdit ? {
+      title: taskToEdit.title,
+      description: taskToEdit.description || "",
+      importanceLevel: taskToEdit.importanceLevel,
+      // Firestore Timestamps need to be converted to JS Dates for the form
+      dueDate: taskToEdit.dueDate ? (taskToEdit.dueDate as any).toDate() : undefined,
+      startTime: taskToEdit.startTime || "",
+      endTime: taskToEdit.endTime || "",
+      timeEstimate: taskToEdit.timeEstimate || "",
+    } : {
+      title: "",
+      description: "",
+      importanceLevel: "medium",
+      dueDate: undefined,
+      startTime: "",
+      endTime: "",
+      timeEstimate: "",
     },
   });
+
+  // When the dialog opens, reset the form with the latest task data
+  useState(() => {
+    if (isOpen && isEditMode && taskToEdit) {
+      form.reset({
+        title: taskToEdit.title,
+        description: taskToEdit.description || "",
+        importanceLevel: taskToEdit.importanceLevel,
+        dueDate: taskToEdit.dueDate ? (taskToEdit.dueDate as any).toDate() : undefined,
+        startTime: taskToEdit.startTime || "",
+        endTime: taskToEdit.endTime || "",
+        timeEstimate: taskToEdit.timeEstimate || "",
+      });
+    } else if (isOpen && !isEditMode) {
+        form.reset({
+            title: "",
+            description: "",
+            importanceLevel: "medium",
+            dueDate: undefined,
+            startTime: "",
+            endTime: "",
+            timeEstimate: "",
+        });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, taskToEdit, isEditMode]);
   
   const handleOpenChange = (open: boolean) => {
     if (!isLoading) {
       setIsOpen(open);
-      if (!open) {
-        form.reset();
-      }
     }
   };
 
   async function onSubmit(values: CreateTaskInput) {
+    if (!user) {
+        toast({ variant: "destructive", title: "You must be logged in." });
+        return;
+    }
+
     setIsLoading(true);
+
+    const taskData: any = {
+      ...values,
+      userId: user.uid,
+      updatedAt: serverTimestamp(),
+      dueDate: values.dueDate ? Timestamp.fromDate(values.dueDate) : null,
+    };
+
     try {
-      if (isEditMode) {
-        const updateValues: UpdateTaskInput = { id: taskToEdit.id, ...values };
-        await updateTaskAction(updateValues);
+      if (isEditMode && taskToEdit) {
+        const taskRef = doc(firestore, "users", user.uid, "tasks", taskToEdit.id);
+        await setDoc(taskRef, taskData, { merge: true });
         toast({ title: "Task updated successfully!" });
-        if(onTaskUpdated) onTaskUpdated({ ...taskToEdit, ...values });
       } else {
-        await createTaskAction(values);
+        taskData.isCompleted = false;
+        taskData.createdAt = serverTimestamp();
+        const collectionRef = collection(firestore, "users", user.uid, "tasks");
+        await addDoc(collectionRef, taskData);
         toast({ title: "Task created successfully!" });
-        // onTaskCreated is handled by optimistic update in the parent
       }
+      await revalidateTasks();
       setIsOpen(false);
-      form.reset();
     } catch (error: any) {
+      console.error("Error saving task:", error);
       toast({
         variant: "destructive",
         title: "An error occurred",

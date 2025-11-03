@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { Timestamp } from "firebase/firestore";
 
 export const TaskSchema = z.object({
   id: z.string(),
@@ -7,12 +8,12 @@ export const TaskSchema = z.object({
   description: z.string().optional(),
   isCompleted: z.boolean(),
   importanceLevel: z.enum(["low", "medium", "high"]),
-  dueDate: z.date().optional(),
+  dueDate: z.instanceof(Date).or(z.instanceof(Timestamp)).optional().nullable(),
   startTime: z.string().optional(),
   endTime: z.string().optional(),
   timeEstimate: z.string().optional(),
-  createdAt: z.any(),
-  updatedAt: z.any(),
+  createdAt: z.any().optional(),
+  updatedAt: z.any().optional(),
 });
 
 export type Task = z.infer<typeof TaskSchema>;
@@ -23,7 +24,10 @@ export const CreateTaskSchema = TaskSchema.omit({
     isCompleted: true, 
     createdAt: true, 
     updatedAt: true 
+}).extend({
+    dueDate: z.instanceof(Date).optional().nullable(),
 });
+
 export type CreateTaskInput = z.infer<typeof CreateTaskSchema>;
 
 export const UpdateTaskSchema = TaskSchema.omit({

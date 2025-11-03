@@ -1,9 +1,10 @@
 "use client";
 
-import { useOptimistic } from "react";
+import { useUser, useFirestore } from "@/firebase";
 import { type Task } from "../domain/task";
 import { TaskItem } from "./TaskItem";
-import { toggleTaskCompletionAction, deleteTaskAction } from "../application/actions";
+import { doc, updateDoc, serverTimestamp, deleteDoc } from "firebase/firestore";
+import { revalidateTasks } from "../application/actions";
 
 interface TaskListProps {
   tasks: Task[];
@@ -11,33 +12,24 @@ interface TaskListProps {
 }
 
 export function TaskList({ tasks, onEdit }: TaskListProps) {
-  const [optimisticTasks, setOptimisticTasks] = useOptimistic(
-    tasks,
-    (state, { action, task, taskId }: { action: 'add' | 'update' | 'delete', task?: Task, taskId?: string }) => {
-      switch (action) {
-        case 'add':
-          return task ? [task, ...state] : state;
-        case 'update':
-          return state.map(t => t.id === task?.id ? { ...t, ...task } : t);
-        case 'delete':
-            return state.filter(t => t.id !== taskId);
-        default:
-          return state;
-      }
-    }
-  );
+    const { user } = useUser();
+    const firestore = useFirestore();
 
   const handleToggleComplete = async (taskId: string, isCompleted: boolean) => {
-    const task = tasks.find(t => t.id === taskId);
-    if(task) {
-        setOptimisticTasks({ action: 'update', task: { ...task, isCompleted } });
-        await toggleTaskCompletionAction(taskId, isCompleted);
-    }
+    if (!user) return;
+    const taskRef = doc(firestore, "users", user.uid, "tasks", taskId);
+    await updateDoc(taskRef, {
+        isCompleted: isCompleted,
+        updatedAt: serverTimestamp(),
+    });
+    await revalidateTasks();
   };
 
   const handleDelete = async (taskId: string) => {
-    setOptimisticTasks({ action: 'delete', taskId });
-    await deleteTaskAction(taskId);
+    if (!user) return;
+    const taskRef = doc(firestore, "users", user.uid, "tasks", taskId);
+    await deleteDoc(taskRef);
+    await revalidateTasks();
   }
 
   if (tasks.length === 0) {
@@ -51,7 +43,7 @@ export function TaskList({ tasks, onEdit }: TaskListProps) {
 
   return (
     <div className="space-y-4">
-      {optimisticTasks.map((task) => (
+      {tasks.map((task) => (
         <TaskItem
           key={task.id}
           task={task}
