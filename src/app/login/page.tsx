@@ -6,6 +6,7 @@ import { AuthLayout } from "@/features/auth/presentation/AuthLayout";
 import { useAuth } from "@/features/auth/presentation/use-auth.hook";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { Loader } from "@/components/ui/loader";
 
 export default function LoginPage() {
     const { user, loading } = useAuth();
@@ -19,7 +20,11 @@ export default function LoginPage() {
 
 
     if (loading || user) {
-        return null;
+      return (
+        <div className="flex min-h-screen items-center justify-center">
+          <Loader className="h-12 w-12" />
+        </div>
+      );
     }
 
   return (
@@ -29,7 +34,7 @@ export default function LoginPage() {
           Welcome back
         </h1>
         <p className="text-sm text-muted-foreground">
-          Enter your email and password to sign in to your account
+          Choose a sign in method below
         </p>
       </div>
       <LoginForm />
