@@ -1,0 +1,83 @@
+/**
+ * @fileoverview Firestore Security Rules for the Momentum Tasks application.
+ *
+ * Core Philosophy:
+ * This ruleset enforces a strict user-ownership model. Each user can only access their own profile and the tasks associated with their account.
+ *
+ * Data Structure:
+ * - /users/{userId}: Stores user profiles, where {userId} is the Firebase Auth UID.
+ * - /users/{userId}/tasks/{taskId}: Stores tasks belonging to a specific user.
+ *
+ * Key Security Decisions:
+ * - Users can only read and write their own user document.
+ * - Users can only read, create, update, and delete tasks under their own user document.
+ * - No user listing is allowed at the top-level `/users` collection, preventing enumeration.
+ * - All write operations are validated to ensure data consistency between the path and document's internal user ID.
+ *
+ * Denormalization for Authorization:
+ * The path `/users/{userId}/tasks/{taskId}` itself provides the necessary authorization context.
+ * No additional `get()` calls or data denormalization is needed to validate ownership.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Secures the user profile documents.
+     * @path /users/{userId}
+     * @allow (create) User with UID 'user_abc' can create their profile at /users/user_abc.
+     * @allow (get) User with UID 'user_abc' can read their profile at /users/user_abc.
+     * @allow (update) User with UID 'user_abc' can update their profile at /users/user_abc.
+     * @allow (delete) User with UID 'user_abc' can delete their profile at /users/user_abc.
+     * @deny (create) User with UID 'user_def' cannot create a profile at /users/user_abc.
+     * @deny (get) User with UID 'user_def' cannot read the profile at /users/user_abc.
+     * @deny (update) User with UID 'user_def' cannot update the profile at /users/user_abc.
+     * @deny (delete) User with UID 'user_def' cannot delete the profile at /users/user_abc.
+     * @principle Enforces document ownership for writes, restricts access to a user's own data tree.
+     */
+    match /users/{userId} {
+      function isOwner(userId) {
+        return request.auth.uid == userId;
+      }
+      function isExistingOwner(userId) {
+        return isOwner(userId) && resource != null;
+      }
+
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Secures the task documents under a user's profile.
+     * @path /users/{userId}/tasks/{taskId}
+     * @allow (create) User 'user_abc' can create a task at /users/user_abc/tasks/task_123.
+     * @allow (get) User 'user_abc' can read a task at /users/user_abc/tasks/task_123.
+     * @allow (list) User 'user_abc' can list tasks under /users/user_abc/tasks.
+     * @allow (update) User 'user_abc' can update a task at /users/user_abc/tasks/task_123.
+     * @allow (delete) User 'user_abc' can delete a task at /users/user_abc/tasks/task_123.
+     * @deny (create) User 'user_def' cannot create a task at /users/user_abc/tasks/task_123.
+     * @deny (get) User 'user_def' cannot read a task at /users/user_abc/tasks/task_123.
+     * @deny (list) User 'user_def' cannot list tasks under /users/user_abc/tasks.
+     * @deny (update) User 'user_def' cannot update a task at /users/user_abc/tasks/task_123.
+     * @deny (delete) User 'user_def' cannot delete a task at /users/user_abc/tasks/task_123.
+     * @principle Enforces document ownership for writes, restricts access to a user's own data tree, validates relational integrity between documents.
+     */
+    match /users/{userId}/tasks/{taskId} {
+      function isOwner(userId) {
+        return request.auth.uid == userId;
+      }
+      function isExistingOwner(userId) {
+        return isOwner(userId) && resource != null;
+      }
+
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && resource.data.userId == request.resource.data.userId;
+      allow delete: if isExistingOwner(userId);
+    }
+  }
+}
