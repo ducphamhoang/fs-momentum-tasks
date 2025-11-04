@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { useAuth, useFirestore } from "@/firebase";
+import { signInWithPopup, GoogleAuthProvider, getAuth } from "firebase/auth";
+import { useAuth as useFirebaseAuth, useFirestore } from "@/firebase";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Loader } from "@/components/ui/loader";
 import { Icons } from "@/shared/presentation/components/icons";
+import { useAuth } from "./hooks/useAuth";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
@@ -30,9 +31,10 @@ const formSchema = z.object({
 
 export function LoginForm() {
   const router = useRouter();
-  const auth = useAuth();
+  const firebaseAuth = useFirebaseAuth();
   const firestore = useFirestore();
   const { toast } = useToast();
+  const { signIn, createUserProfile } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
@@ -47,7 +49,7 @@ export function LoginForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, values.email, values.password);
+      await signIn(values.email, values.password);
       router.push("/");
     } catch (error: any) {
       toast({
@@ -64,15 +66,15 @@ export function LoginForm() {
     setIsGoogleLoading(true);
     try {
       const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(firebaseAuth, provider);
       const user = result.user;
       
-      await setDoc(doc(firestore, "users", user.uid), {
-        email: user.email,
-        displayName: user.displayName,
-        photoURL: user.photoURL,
-        createdAt: serverTimestamp(),
-      }, { merge: true });
+      // Create or update user profile in Firestore
+      await createUserProfile({
+        email: user.email || "",
+        displayName: user.displayName || undefined,
+        photoURL: user.photoURL || undefined,
+      }, user.uid);
 
       router.push("/");
     } catch (error: any) {

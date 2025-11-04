@@ -1,11 +1,12 @@
 "use server";
 
 import { headers } from "next/headers";
-import { getAuth } from "firebase-admin";
+import { getAuth } from "firebase-admin/auth";
 import { initializeApp, getApps, App } from "firebase-admin/app";
-import { getFirestore, collection, getDocs, query, Timestamp } from "firebase-admin/firestore";
-import { prioritizeTasks as aiPrioritizeTasks } from "@/ai/flows/ai-prioritize-tasks";
+import { getFirestore, Timestamp } from "firebase-admin/firestore";
 import type { Task } from "../domain/task";
+import { TaskAIServiceImpl } from "./services/ai/task-ai-service";
+import { PrioritizeTasksOutput } from "@/ai/flows/ai-prioritize-tasks";
 
 function getAdminApp(): App {
     if (getApps().length > 0) {
@@ -21,7 +22,8 @@ function getAdminApp(): App {
 
 
 async function getAuthenticatedUserId() {
-    const idToken = headers().get("Authorization")?.split("Bearer ")[1];
+    const authHeader = (await headers()).get("Authorization");
+    const idToken = authHeader?.split("Bearer ")[1];
     if (!idToken) {
         throw new Error("You must be logged in to perform this action.");
     }
@@ -39,9 +41,8 @@ export async function getTasksAction(): Promise<Task[]> {
   const userId = await getAuthenticatedUserId();
   const adminApp = getAdminApp();
   const db = getFirestore(adminApp);
-  const tasksRef = collection(db, "users", userId, "tasks");
-  const q = query(tasksRef);
-  const querySnapshot = await getDocs(q);
+  const tasksCollection = db.collection(`users/${userId}/tasks`);
+  const querySnapshot = await tasksCollection.get();
   
   const tasks = querySnapshot.docs.map((doc) => {
     const data = doc.data();
@@ -58,4 +59,8 @@ export async function getTasksAction(): Promise<Task[]> {
   return tasks;
 }
 
-export const prioritizeTasks = aiPrioritizeTasks;
+export async function prioritizeTasks(): Promise<PrioritizeTasksOutput> {
+  const tasks = await getTasksAction();
+  const aiService = new TaskAIServiceImpl();
+  return await aiService.prioritizeTasks(tasks);
+}
