@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CalendarIcon } from "lucide-react";
@@ -71,8 +71,7 @@ export function CreateEditTaskDialog({
       title: taskToEdit.title,
       description: taskToEdit.description || "",
       importanceLevel: taskToEdit.importanceLevel,
-      // Firestore Timestamps need to be converted to JS Dates for the form
-      dueDate: taskToEdit.dueDate ? (taskToEdit.dueDate as any).toDate() : undefined,
+      dueDate: taskToEdit.dueDate instanceof Date ? taskToEdit.dueDate : null,
       startTime: taskToEdit.startTime || "",
       endTime: taskToEdit.endTime || "",
       timeEstimate: taskToEdit.timeEstimate || "",
@@ -80,21 +79,21 @@ export function CreateEditTaskDialog({
       title: "",
       description: "",
       importanceLevel: "medium",
-      dueDate: undefined,
+      dueDate: null, // Changed from undefined to null to match the schema
       startTime: "",
       endTime: "",
       timeEstimate: "",
     },
   });
 
-  // When the dialog opens, reset the form with the latest task data
-  useState(() => {
+  // When the dialog opens or task data changes, reset the form with the latest task data
+  useEffect(() => {
     if (isOpen && isEditMode && taskToEdit) {
       form.reset({
         title: taskToEdit.title,
         description: taskToEdit.description || "",
         importanceLevel: taskToEdit.importanceLevel,
-        dueDate: taskToEdit.dueDate ? (taskToEdit.dueDate as any).toDate() : undefined,
+        dueDate: taskToEdit.dueDate instanceof Date ? taskToEdit.dueDate : null,
         startTime: taskToEdit.startTime || "",
         endTime: taskToEdit.endTime || "",
         timeEstimate: taskToEdit.timeEstimate || "",
@@ -104,7 +103,7 @@ export function CreateEditTaskDialog({
             title: "",
             description: "",
             importanceLevel: "medium",
-            dueDate: undefined,
+            dueDate: null,
             startTime: "",
             endTime: "",
             timeEstimate: "",
