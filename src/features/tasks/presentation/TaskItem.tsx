@@ -81,7 +81,10 @@ export function TaskItem({ task, onToggleComplete, onDelete, onEdit }: TaskItemP
             {task.dueDate && (
                 <Badge variant="outline" className="gap-1">
                     <Calendar className="h-3 w-3" />
-                    {format(new Date(task.dueDate), "MMM d")}
+                    {(() => {
+                        const date = new Date(task.dueDate);
+                        return isNaN(date.getTime()) ? 'Invalid Date' : format(date, "MMM d");
+                    })()}
                 </Badge>
             )}
             {isMeeting && (

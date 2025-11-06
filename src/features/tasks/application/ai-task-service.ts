@@ -5,7 +5,7 @@ import { getAuth } from "firebase-admin/auth";
 import { initializeApp, getApps, App } from "firebase-admin/app";
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
 import type { Task } from "../domain/task";
-import { TaskAIServiceImpl } from "./services/ai/task-ai-service";
+import { prioritizeTasksService } from "./services/ai/task-ai-service";
 import { PrioritizeTasksOutput } from "@/ai/flows/ai-prioritize-tasks";
 
 function getAdminApp(): App {
@@ -46,13 +46,18 @@ export async function getTasksAction(): Promise<Task[]> {
   
   const tasks = querySnapshot.docs.map((doc) => {
     const data = doc.data();
+    // Check if timestamps are already converted to JS Dates or are still Firestore Timestamps
+    const dueDate = (data.dueDate instanceof Date) ? data.dueDate : (data.dueDate as Timestamp | undefined)?.toDate();
+    const createdAt = (data.createdAt instanceof Date) ? data.createdAt : (data.createdAt as Timestamp | undefined)?.toDate();
+    const updatedAt = (data.updatedAt instanceof Date) ? data.updatedAt : (data.updatedAt as Timestamp | undefined)?.toDate();
+    
     return {
       id: doc.id,
       ...data,
       // Convert Firestore Timestamps to JS Dates
-      dueDate: (data.dueDate as Timestamp | undefined)?.toDate(),
-      createdAt: (data.createdAt as Timestamp | undefined)?.toDate(),
-      updatedAt: (data.updatedAt as Timestamp | undefined)?.toDate(),
+      dueDate,
+      createdAt,
+      updatedAt,
     } as Task;
   });
 
@@ -61,6 +66,5 @@ export async function getTasksAction(): Promise<Task[]> {
 
 export async function prioritizeTasks(): Promise<PrioritizeTasksOutput> {
   const tasks = await getTasksAction();
-  const aiService = new TaskAIServiceImpl();
-  return await aiService.prioritizeTasks(tasks);
+  return await prioritizeTasksService(tasks);
 }
