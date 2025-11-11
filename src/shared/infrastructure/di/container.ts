@@ -2,6 +2,10 @@ import { FirebaseAuthRepository } from "@/features/auth/infrastructure/auth/fire
 import { FirestoreTaskRepository } from "@/features/tasks/infrastructure/persistence/firestore-task-repository";
 import { AuthApplicationServiceImpl } from "@/features/auth/application/services/auth-service";
 import { TaskApplicationServiceImpl } from "@/features/tasks/application/services/task-service";
+import { FirestoreVerificationCodeRepository } from "@/features/chatbot-integration/infrastructure/persistence/firestore-verification-code-repository";
+import { FirestoreChatbotSessionRepository } from "@/features/chatbot-integration/infrastructure/persistence/firestore-chatbot-session-repository";
+import { JsonwebtokenService } from "@/features/chatbot-integration/infrastructure/jwt/jsonwebtoken-service";
+import { ChatbotAuthService } from "@/features/chatbot-integration/application/services/chatbot-auth-service";
 
 // Container for application services
 class DIContainer {
@@ -12,6 +16,12 @@ class DIContainer {
   // Task services
   private _taskRepository: FirestoreTaskRepository | null = null;
   private _taskApplicationService: TaskApplicationServiceImpl | null = null;
+
+  // Chatbot integration services
+  private _verificationCodeRepository: FirestoreVerificationCodeRepository | null = null;
+  private _chatbotSessionRepository: FirestoreChatbotSessionRepository | null = null;
+  private _jsonwebtokenService: JsonwebtokenService | null = null;
+  private _chatbotAuthService: ChatbotAuthService | null = null;
 
   // Auth services
   get authRepository(): FirebaseAuthRepository {
@@ -41,6 +51,39 @@ class DIContainer {
       this._taskApplicationService = new TaskApplicationServiceImpl(this.taskRepository);
     }
     return this._taskApplicationService;
+  }
+
+  // Chatbot integration services
+  get verificationCodeRepository(): FirestoreVerificationCodeRepository {
+    if (!this._verificationCodeRepository) {
+      this._verificationCodeRepository = new FirestoreVerificationCodeRepository();
+    }
+    return this._verificationCodeRepository;
+  }
+
+  get chatbotSessionRepository(): FirestoreChatbotSessionRepository {
+    if (!this._chatbotSessionRepository) {
+      this._chatbotSessionRepository = new FirestoreChatbotSessionRepository();
+    }
+    return this._chatbotSessionRepository;
+  }
+
+  get jsonwebtokenService(): JsonwebtokenService {
+    if (!this._jsonwebtokenService) {
+      this._jsonwebtokenService = new JsonwebtokenService();
+    }
+    return this._jsonwebtokenService;
+  }
+
+  get chatbotAuthService(): ChatbotAuthService {
+    if (!this._chatbotAuthService) {
+      this._chatbotAuthService = new ChatbotAuthService({
+        verificationCodeRepository: this.verificationCodeRepository,
+        chatbotSessionRepository: this.chatbotSessionRepository,
+        jwtService: this.jsonwebtokenService,
+      });
+    }
+    return this._chatbotAuthService;
   }
 }
 

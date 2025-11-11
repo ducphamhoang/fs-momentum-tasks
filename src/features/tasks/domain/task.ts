@@ -11,7 +11,8 @@ export const TaskSchema = z.object({
   dueDate: z.instanceof(Date).or(z.instanceof(Timestamp)).optional().nullable(),
   startTime: z.string().optional(),
   endTime: z.string().optional(),
-  timeEstimate: z.string().optional(),
+  timeEstimate: z.number().optional(), // Changed from string to number for minutes
+  source: z.enum(["web", "chatbot"]).optional().default("web"),
   createdAt: z.any().optional(),
   updatedAt: z.any().optional(),
 });

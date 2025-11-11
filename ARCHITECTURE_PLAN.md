@@ -66,3 +66,11 @@ src/shared/
 4. Move AI flows into appropriate features
 5. Update dependency injection
 6. Refactor imports to follow new architecture
+7. Add chatbot-integration feature (See: `openspec/changes/add-chatbot-integration/`)
+
+### API Routes vs Server Actions:
+- **Server Actions** (Primary): Used for web application data operations
+- **API Routes** (Secondary): Used only for external integrations (e.g., chatbot)
+  - Located in: `src/features/{feature}/presentation/api/`
+  - Pattern: Thin adapters that validate auth, call server actions, format JSON responses
+  - Example: Chatbot integration at `src/features/chatbot-integration/presentation/api/`
