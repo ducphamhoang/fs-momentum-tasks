@@ -143,11 +143,11 @@
 
 ## 8. Infrastructure Layer - Background Sync Job
 
-- [ ] 8.1 Create Cloud Function for scheduled sync in `functions/src/scheduled-sync.ts`
-- [ ] 8.2 Implement user batch processing (fetch users with connected accounts)
-- [ ] 8.3 Implement per-user sync invocation using TaskSyncService
-- [ ] 8.4 Configure Cloud Scheduler job (every 3 minutes)
-- [ ] 8.5 Add error handling and retry logic
+- [x] 8.1 Create Cloud Function for scheduled sync in `functions/src/scheduled-sync.ts`
+- [x] 8.2 Implement user batch processing (fetch users with connected accounts)
+- [x] 8.3 Implement per-user sync invocation using TaskSyncService
+- [x] 8.4 Configure Cloud Scheduler job (every 3 minutes)
+- [x] 8.5 Add error handling and retry logic
 - [ ] 8.6 Add monitoring and alerting for sync failures
 - [ ] 8.7 Test Cloud Function locally with Firebase emulator
 - [ ] 8.8 Deploy Cloud Function to staging environment
