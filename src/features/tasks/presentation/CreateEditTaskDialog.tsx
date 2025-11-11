@@ -46,6 +46,7 @@ import { Loader } from "@/components/ui/loader";
 
 import { CreateTaskSchema, type Task, type CreateTaskInput } from "../domain/task";
 import { revalidateTasks } from "../application/actions";
+import { TimeBlockPicker } from "./components/TimeBlockPicker";
 
 
 interface CreateEditTaskDialogProps {
@@ -259,34 +260,13 @@ export function CreateEditTaskDialog({
                     />
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
-                <FormField
-                control={form.control}
-                name="startTime"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Start Time (Optional)</FormLabel>
-                    <FormControl>
-                        <Input type="time" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
-                <FormField
-                control={form.control}
-                name="endTime"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>End Time (Optional)</FormLabel>
-                    <FormControl>
-                        <Input type="time" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
-            </div>
+            <TimeBlockPicker
+              startTime={form.watch("startTime")}
+              endTime={form.watch("endTime")}
+              onStartTimeChange={(time) => form.setValue("startTime", time)}
+              onEndTimeChange={(time) => form.setValue("endTime", time)}
+              disabled={isLoading}
+            />
              <FormField
               control={form.control}
               name="timeEstimate"

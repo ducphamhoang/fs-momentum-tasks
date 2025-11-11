@@ -1,5 +1,30 @@
 # Implementation Tasks: Google Tasks Integration MVP
 
+## Progress Summary
+
+**Completed Sections:** 1-10 (excluding deferred tasks)
+**Overall Progress:** ~85% MVP complete
+
+**Sections Complete:**
+- ✅ Section 1-2: Project setup and database schema
+- ✅ Section 3: TaskProvider domain interface
+- ✅ Section 4: OAuth implementation
+- ✅ Section 5: Google Tasks provider
+- ✅ Section 6: Task sync service
+- ✅ Section 7: Task service integration (with deferred tasks noted)
+- ✅ Section 8: Background sync Cloud Function
+- ✅ Section 9: OAuth connection UI
+- ✅ Section 10: Time blocking UI (Day View MVP)
+
+**Remaining Sections:**
+- Section 11: Task filtering & source labels
+- Section 12-13: Reminder system
+- Section 14: Notification system
+- Section 15: End-to-end testing
+- Section 16: Documentation
+
+---
+
 ## MVP Scope Decisions
 
 **Architecture Decisions:**
@@ -154,32 +179,32 @@
 
 ## 9. Presentation Layer - OAuth Connection UI
 
-- [ ] 9.1 Create "Integrations" settings page component
-- [ ] 9.2 Add "Connect Google Tasks" button with OAuth initiation
+- [x] 9.1 Create "Integrations" settings page component (`src/app/settings/integrations/page.tsx`)
+- [x] 9.2 Add "Connect Google Tasks" button with OAuth initiation (integrated in page)
 - [x] 9.3 Create OAuth callback page to handle redirect (completed in Section 4)
-- [ ] 9.4 Display connection status (connected, disconnected, error)
-- [ ] 9.5 Add "Disconnect" button with confirmation dialog
-- [ ] 9.6 Display last sync timestamp
+- [x] 9.4 Display connection status (connected, disconnected, error)
+- [x] 9.5 Add "Disconnect" button with confirmation dialog (AlertDialog component)
+- [x] 9.6 Display last sync timestamp (shows connected date and last synced date)
 - [x] 9.7 Add manual "Sync Now" button (server action created in `sync-actions.ts`)
-- [ ] 9.8 Add loading indicators during OAuth and sync operations
-- [ ] 9.9 Write component tests for integration settings
+- [x] 9.8 Add loading indicators during OAuth and sync operations (using Loader component)
+- [ ] 9.9 Write component tests for integration settings (deferred)
 
 ## 10. Presentation Layer - Time Blocking UI (MVP: Day View Only)
 
-- [ ] 10.0 Review existing UI components in `src/components/ui/` (calendar, dialog, date-picker)
-- [ ] 10.1 Create `TimeBlockPicker` component with start/end time inputs (use existing form components)
-- [ ] 10.2 Update task detail dialog (CreateEditTaskDialog) to include time block assignment
-- [ ] 10.3 Display time block badges on task list items in TaskList component
-- [ ] 10.4 Create "Day View" calendar component showing hourly time blocks:
-  - [ ] 10.4a Build day view grid with hourly slots (e.g., 6am-11pm)
-  - [ ] 10.4b Display time-blocked tasks in their scheduled slots
-  - [ ] 10.4c Add date navigation (previous/next day, jump to date)
-- [ ] 10.5 Create "Today" view component showing current day's scheduled tasks
-- [ ] 10.6 Add time block conflict detection logic
-- [ ] 10.7 Add visual indicators for time block conflicts (overlapping times)
-- [ ] 10.8 Implement timezone conversion for display (use date-fns)
-- [ ] 10.9 Add time block editing/removal functionality in task dialog
-- [ ] 10.10 Write component tests for time blocking UI components
+- [x] 10.0 Review existing UI components in `src/components/ui/` (calendar, dialog, date-picker)
+- [x] 10.1 Create `TimeBlockPicker` component with start/end time inputs (`src/features/tasks/presentation/components/TimeBlockPicker.tsx`)
+- [x] 10.2 Update task detail dialog (CreateEditTaskDialog) to include time block assignment (replaced basic time inputs with TimeBlockPicker)
+- [x] 10.3 Display time block badges on task list items in TaskList component (already existed with Clock icon)
+- [x] 10.4 Create "Day View" calendar component showing hourly time blocks:
+  - [x] 10.4a Build day view grid with hourly slots (24-hour view in `src/features/tasks/presentation/components/DayView.tsx`)
+  - [x] 10.4b Display time-blocked tasks in their scheduled slots
+  - [x] 10.4c Add date navigation (previous/next day, jump to date with calendar picker)
+- [x] 10.5 Create "Today" view component showing current day's scheduled tasks (`src/features/tasks/presentation/components/TodayView.tsx`)
+- [x] 10.6 Add time block conflict detection logic (implemented in both DayView and TodayView)
+- [x] 10.7 Add visual indicators for time block conflicts (red borders and "Conflict" badges)
+- [ ] 10.8 Implement timezone conversion for display (using local time for MVP, deferred)
+- [x] 10.9 Add time block editing/removal functionality in task dialog (edit via TimeBlockPicker, remove by clearing times)
+- [ ] 10.10 Write component tests for time blocking UI components (deferred)
 - [ ] 10.11 (Post-MVP) Week and month calendar views deferred to future iteration
 
 ## 11. Presentation Layer - Task Filtering & Source Labels
