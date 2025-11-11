@@ -3,19 +3,37 @@
 ## 1. Project Setup & Dependencies
 
 - [ ] 1.1 Install Google Tasks API client library (`googleapis`)
-- [ ] 1.2 Configure Google Cloud Console project with Tasks API enabled
-- [ ] 1.3 Create OAuth 2.0 credentials (client ID, client secret)
-- [ ] 1.4 Add OAuth credentials to environment variables
-- [ ] 1.5 Set up OAuth redirect URI in Google Cloud Console
+- [ ] 1.2 Install Firebase Functions SDK (`firebase-functions`, `firebase-admin`)
+- [ ] 1.3 Initialize Firebase Functions directory structure (`firebase init functions`)
+- [ ] 1.4 Configure TypeScript for Functions (tsconfig.json in functions/)
+- [ ] 1.5 Set up Functions environment variables using Firebase config
+- [ ] 1.6 Configure Google Cloud Console project with Tasks API enabled
+- [ ] 1.7 Create OAuth 2.0 credentials (client ID, client secret)
+- [ ] 1.8 Add OAuth credentials to environment variables (.env and Functions config)
+- [ ] 1.9 Set up OAuth redirect URI in Google Cloud Console
+- [ ] 1.10 Test Firebase Functions emulator locally
 
 ## 2. Database Schema Updates
 
-- [ ] 2.1 Extend Task entity type with new fields (source, externalId, externalEtag, timeBlock, reminders, lastSyncedAt)
-- [ ] 2.2 Create Firestore collection `user_tokens` with schema for OAuth tokens
-- [ ] 2.3 Write Firestore security rules for `user_tokens` collection (user-scoped access only)
-- [ ] 2.4 Create Firestore indexes for efficient queries (userId+source, userId+externalId, reminder trigger times)
-- [ ] 2.5 Write migration script to add `source: 'local'` to existing tasks
-- [ ] 2.6 Test migration script with sample data
+- [ ] 2.0 Review existing Task schema (already has startTime/endTime fields and source enum)
+- [ ] 2.1 Extend Task entity source enum from ["web", "chatbot"] to ["web", "chatbot", "local", "google-tasks"]
+- [ ] 2.2 Add new fields to Task entity: externalId (string), externalEtag (string), lastSyncedAt (Timestamp)
+- [ ] 2.3 Clarify timeBlock strategy: use existing startTime/endTime OR create new timeBlock object
+- [ ] 2.4 Add reminders array field to Task entity: [{ id, triggerTime, notified }]
+- [ ] 2.5 Create Firestore collection `user_tokens` with schema for OAuth tokens
+- [ ] 2.6 Write Firestore security rules for `user_tokens` collection:
+  - [ ] 2.6a Ensure users can only read/write their own tokens
+  - [ ] 2.6b Prevent client-side access (server-only via Firebase Admin SDK)
+  - [ ] 2.6c Add audit logging for token access
+- [ ] 2.7 Create explicit Firestore composite indexes:
+  - [ ] 2.7a Index: userId + source (for filtering tasks by source)
+  - [ ] 2.7b Index: userId + externalId (for sync lookups)
+  - [ ] 2.7c Index: userId + reminders.triggerTime (for reminder queries)
+  - [ ] 2.7d Index: userId + startTime (for calendar/time block queries)
+- [ ] 2.8 Write migration script to update existing tasks:
+  - [ ] 2.8a Add source: 'local' to tasks with source='web' or no source
+  - [ ] 2.8b Initialize new fields as null/empty for existing tasks
+- [ ] 2.9 Test migration script with sample data in development environment
 
 ## 3. Domain Layer - TaskProvider Interface
 
@@ -26,15 +44,25 @@
 
 ## 4. Infrastructure Layer - OAuth Implementation
 
-- [ ] 4.1 Create OAuth configuration in `src/features/auth/infrastructure/oauth/oauth-config.ts`
-- [ ] 4.2 Implement Google OAuth flow in `src/features/auth/infrastructure/oauth/google-oauth.ts`
-- [ ] 4.3 Create OAuth initiation server action (`initiateGoogleOAuth`)
-- [ ] 4.4 Create OAuth callback handler server action (`handleGoogleOAuthCallback`)
-- [ ] 4.5 Implement token storage service (`TokenStorageService`) with encryption
+- [ ] 4.0 Review existing auth feature structure at `src/features/auth/`
+- [ ] 4.1 Create OAuth subdirectory: `src/features/auth/infrastructure/oauth/`
+- [ ] 4.2 Define OAuth domain interfaces in `src/features/auth/domain/repositories/`
+- [ ] 4.3 Create OAuth configuration in `src/features/auth/infrastructure/oauth/oauth-config.ts`
+- [ ] 4.4 Implement Google OAuth flow in `src/features/auth/infrastructure/oauth/google-oauth.ts`
+- [ ] 4.5 Implement TokenStorageService in `src/features/auth/infrastructure/oauth/token-storage-service.ts`:
+  - [ ] 4.5a Use Firebase Admin SDK for server-side token encryption
+  - [ ] 4.5b Store tokens in Firestore `user_tokens` collection
+  - [ ] 4.5c Implement token rotation on every refresh
+  - [ ] 4.5d Add token expiration tracking
 - [ ] 4.6 Implement token refresh logic (`refreshAccessToken`)
 - [ ] 4.7 Implement token revocation logic (`revokeAccessToken`)
-- [ ] 4.8 Write unit tests for OAuth flow components
-- [ ] 4.9 Write integration tests for OAuth end-to-end flow
+- [ ] 4.8 Create OAuth server actions in `src/features/auth/presentation/actions/oauth-actions.ts`:
+  - [ ] 4.8a Implement `initiateGoogleOAuth` server action
+  - [ ] 4.8b Implement `handleGoogleOAuthCallback` server action
+  - [ ] 4.8c Implement `disconnectGoogleAccount` server action
+- [ ] 4.9 Create OAuth callback page at `src/app/auth/callback/google/page.tsx`
+- [ ] 4.10 Write unit tests for OAuth flow components
+- [ ] 4.11 Write integration tests for OAuth end-to-end flow
 
 ## 5. Infrastructure Layer - Google Tasks Provider
 
@@ -61,14 +89,40 @@
 - [ ] 6.8 Write unit tests for sync logic (various conflict scenarios)
 - [ ] 6.9 Write integration tests for end-to-end sync
 
+## 6.5. Error Handling & Resilience
+
+- [ ] 6.5.1 Define error types in `src/features/tasks/domain/errors/`:
+  - [ ] 6.5.1a SyncError (base class for sync failures)
+  - [ ] 6.5.1b ProviderAuthError (OAuth token expired/invalid)
+  - [ ] 6.5.1c ProviderRateLimitError (API quota exceeded)
+  - [ ] 6.5.1d ProviderConnectionError (network failures)
+  - [ ] 6.5.1e ConflictError (merge conflicts during sync)
+- [ ] 6.5.2 Implement error mapping in GoogleTasksProvider (API errors → domain errors)
+- [ ] 6.5.3 Implement retry logic with exponential backoff in GoogleTasksProvider
+- [ ] 6.5.4 Create user-friendly error messages mapping in presentation layer
+- [ ] 6.5.5 Add structured logging infrastructure:
+  - [ ] 6.5.5a Log all sync operations (start, success, failure)
+  - [ ] 6.5.5b Log API errors with context (userId, operation, timestamp)
+  - [ ] 6.5.5c Use Firebase Cloud Logging for Functions
+- [ ] 6.5.6 Write unit tests for error scenarios:
+  - [ ] 6.5.6a Test OAuth token expiration handling
+  - [ ] 6.5.6b Test rate limit backoff behavior
+  - [ ] 6.5.6c Test network failure retry logic
+  - [ ] 6.5.6d Test conflict resolution with errors
+
 ## 7. Application Layer - Task Service Integration
 
-- [ ] 7.1 Update `TaskService` to use `TaskProvider` for external task operations
-- [ ] 7.2 Modify `createTask` to route to provider if task has external source
-- [ ] 7.3 Modify `updateTask` to route to provider and trigger sync
-- [ ] 7.4 Modify `deleteTask` to route to provider and trigger sync
-- [ ] 7.5 Add source filtering logic to task queries
-- [ ] 7.6 Update existing tests to account for new provider pattern
+- [ ] 7.0 Create TaskProviderRegistry in `src/features/tasks/application/services/task-provider-registry.ts`:
+  - [ ] 7.0a Register available providers (LocalProvider, GoogleTasksProvider)
+  - [ ] 7.0b Implement getProvider(source) method
+  - [ ] 7.0c Handle provider not found errors
+- [ ] 7.1 Update DI container in `src/shared/infrastructure/di/` to inject TaskProviderRegistry
+- [ ] 7.2 Modify CreateTaskUseCase to route external tasks to appropriate provider
+- [ ] 7.3 Modify UpdateTaskUseCase to route external tasks to provider and trigger sync
+- [ ] 7.4 Modify DeleteTaskUseCase to route external tasks to provider and trigger sync
+- [ ] 7.5 Update GetTasksUseCase to support source filtering parameter
+- [ ] 7.6 Update existing unit tests for use-cases to account for provider pattern
+- [ ] 7.7 Write integration tests for provider routing logic
 
 ## 8. Infrastructure Layer - Background Sync Job
 
@@ -95,18 +149,21 @@
 
 ## 10. Presentation Layer - Time Blocking UI
 
-- [ ] 10.1 Create `TimeBlockPicker` component with start/end time inputs
-- [ ] 10.2 Add time block assignment UI in task detail dialog
-- [ ] 10.3 Display time block badges on task list items
-- [ ] 10.4 Create calendar view component (day/week/month modes)
-- [ ] 10.5 Implement calendar day view with time blocks
-- [ ] 10.6 Implement calendar week view with time blocks
-- [ ] 10.7 Implement calendar month view with time block indicators
-- [ ] 10.8 Add time block conflict detection and visual indicators
-- [ ] 10.9 Create "Today" view showing current day's time blocks
-- [ ] 10.10 Implement timezone conversion for display
-- [ ] 10.11 Add time block editing/removal functionality
-- [ ] 10.12 Write component tests for time blocking UI
+- [ ] 10.0 Review existing UI components in `src/components/ui/` (calendar, dialog, date-picker)
+- [ ] 10.1 Decide: extend existing calendar component OR build custom time block calendar
+- [ ] 10.2 Create `TimeBlockPicker` component with start/end time inputs (use existing form components)
+- [ ] 10.3 Update task detail dialog (CreateEditTaskDialog) to include time block assignment
+- [ ] 10.4 Display time block badges on task list items in TaskList component
+- [ ] 10.5 Create calendar view component with day/week/month modes:
+  - [ ] 10.5a Implement calendar day view showing hourly time blocks
+  - [ ] 10.5b Implement calendar week view with time blocks
+  - [ ] 10.5c Implement calendar month view with time block indicators
+- [ ] 10.6 Add time block conflict detection logic
+- [ ] 10.7 Add visual indicators for time block conflicts (overlapping times)
+- [ ] 10.8 Create "Today" view component showing current day's scheduled tasks
+- [ ] 10.9 Implement timezone conversion for display (use date-fns)
+- [ ] 10.10 Add time block editing/removal functionality in task dialog
+- [ ] 10.11 Write component tests for time blocking UI components
 
 ## 11. Presentation Layer - Task Filtering & Source Labels
 
@@ -153,16 +210,28 @@
 
 ## 15. Testing & Quality Assurance
 
-- [ ] 15.1 Write end-to-end tests for OAuth flow
+- [ ] 15.0 Define testing strategy and coverage targets:
+  - [ ] 15.0a Domain layer (entities, use-cases): Target 100% coverage
+  - [ ] 15.0b Application layer (services): Target >90% coverage
+  - [ ] 15.0c Infrastructure layer (providers, repositories): Target >80% with mocked APIs
+  - [ ] 15.0d Presentation layer (components): Target >70% for critical user flows
+  - [ ] 15.0e Use Vitest for unit/integration tests
+- [ ] 15.1 Write end-to-end tests for OAuth flow (using Vitest)
 - [ ] 15.2 Write end-to-end tests for task sync (create, update, delete, complete)
 - [ ] 15.3 Write end-to-end tests for time blocking workflow
 - [ ] 15.4 Write end-to-end tests for reminder notifications
-- [ ] 15.5 Perform manual testing with real Google Tasks account
-- [ ] 15.6 Test sync conflict scenarios manually
-- [ ] 15.7 Test OAuth token refresh and revocation
-- [ ] 15.8 Test rate limiting and error handling
-- [ ] 15.9 Verify Firestore security rules with test users
-- [ ] 15.10 Run full test suite and achieve >80% coverage
+- [ ] 15.5 Perform manual testing with real Google Tasks account:
+  - [ ] 15.5a Test OAuth connection and disconnection
+  - [ ] 15.5b Test bidirectional sync (app → Google, Google → app)
+  - [ ] 15.5c Test task operations (CRUD) with sync
+- [ ] 15.6 Test sync conflict scenarios manually:
+  - [ ] 15.6a Concurrent edits on different devices
+  - [ ] 15.6b Offline edits with delayed sync
+  - [ ] 15.6c Task deletion conflicts
+- [ ] 15.7 Test OAuth token refresh and revocation flows
+- [ ] 15.8 Test rate limiting and error handling (simulate API errors)
+- [ ] 15.9 Verify Firestore security rules with test users (non-admin accounts)
+- [ ] 15.10 Run full Vitest test suite and verify coverage targets met
 
 ## 16. Documentation & Deployment
 
