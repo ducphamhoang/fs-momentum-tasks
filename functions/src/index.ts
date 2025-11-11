@@ -9,3 +9,6 @@ export const helloWorld = functions.https.onRequest((request, response) => {
   functions.logger.info("Hello logs!", {structuredData: true});
   response.send("Hello from Firebase!");
 });
+
+// Export scheduled sync functions
+export { scheduledTaskSync, manualTaskSync } from "./scheduled-sync";

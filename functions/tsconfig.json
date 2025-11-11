@@ -9,10 +9,15 @@
     "target": "es2017",
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["../src/*"]
+    }
   },
   "compileOnSave": true,
   "include": [
-    "src"
+    "src",
+    "../src/**/*.ts"
   ]
 }
