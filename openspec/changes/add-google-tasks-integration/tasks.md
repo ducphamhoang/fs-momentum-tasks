@@ -19,10 +19,10 @@
 
 ## 1. Project Setup & Dependencies
 
-- [ ] 1.1 Install Google Tasks API client library (`googleapis`)
-- [ ] 1.2 Install Firebase Functions SDK (`firebase-functions`, `firebase-admin`)
-- [ ] 1.3 Initialize Firebase Functions in standard `/functions/` directory (`firebase init functions`)
-- [ ] 1.4 Configure TypeScript for Functions (tsconfig.json in functions/)
+- [x] 1.1 Install Google Tasks API client library (`googleapis`)
+- [x] 1.2 Install Firebase Functions SDK (`firebase-functions`, `firebase-admin`)
+- [x] 1.3 Initialize Firebase Functions in standard `/functions/` directory (`firebase init functions`)
+- [x] 1.4 Configure TypeScript for Functions (tsconfig.json in functions/)
 - [ ] 1.5 Set up Functions environment variables using Firebase config
 - [ ] 1.6 Configure Google Cloud Console project with Tasks API enabled
 - [ ] 1.7 Create OAuth 2.0 credentials (client ID, client secret)
@@ -32,90 +32,90 @@
 
 ## 2. Database Schema Updates
 
-- [ ] 2.0 Review existing Task schema (already has startTime/endTime fields and source enum)
-- [ ] 2.1 Extend Task entity source enum from ["web", "chatbot"] to ["web", "chatbot", "local", "google-tasks"]
-- [ ] 2.2 Add new fields to Task entity: externalId (string), externalEtag (string), lastSyncedAt (Timestamp)
-- [ ] 2.3 DECISION: Use existing startTime/endTime fields for time blocks (no new timeBlock object needed)
-- [ ] 2.4 Add reminders array field to Task entity: [{ id, triggerTime, notified }]
-- [ ] 2.5 Create Firestore collection `user_tokens` with schema for OAuth tokens
-- [ ] 2.6 Write Firestore security rules for `user_tokens` collection:
-  - [ ] 2.6a Ensure users can only read/write their own tokens
-  - [ ] 2.6b Prevent client-side access (server-only via Firebase Admin SDK)
-  - [ ] 2.6c Add audit logging for token access
-- [ ] 2.7 Create explicit Firestore composite indexes:
-  - [ ] 2.7a Index: userId + source (for filtering tasks by source)
-  - [ ] 2.7b Index: userId + externalId (for sync lookups)
-  - [ ] 2.7c Index: userId + reminders.triggerTime (for reminder queries)
-  - [ ] 2.7d Index: userId + startTime (for calendar/time block queries)
-- [ ] 2.8 Write migration script to update existing tasks:
-  - [ ] 2.8a Add source: 'local' to tasks with source='web' or no source
-  - [ ] 2.8b Initialize new fields as null/empty for existing tasks
-- [ ] 2.9 Test migration script with sample data in development environment
+- [x] 2.0 Review existing Task schema (already has startTime/endTime fields and source enum)
+- [x] 2.1 Extend Task entity source enum from ["web", "chatbot"] to ["web", "chatbot", "local", "google-tasks"]
+- [x] 2.2 Add new fields to Task entity: externalId (string), externalEtag (string), lastSyncedAt (Timestamp)
+- [x] 2.3 DECISION: Use existing startTime/endTime fields for time blocks (no new timeBlock object needed)
+- [x] 2.4 Add reminders array field to Task entity: [{ id, triggerTime, notified }]
+- [x] 2.5 Create Firestore collection `user_tokens` with schema for OAuth tokens
+- [x] 2.6 Write Firestore security rules for `user_tokens` collection:
+  - [x] 2.6a Ensure users can only read/write their own tokens
+  - [x] 2.6b Prevent client-side access (server-only via Firebase Admin SDK)
+  - [x] 2.6c Add audit logging for token access
+- [x] 2.7 Create explicit Firestore composite indexes:
+  - [x] 2.7a Index: userId + source (for filtering tasks by source)
+  - [x] 2.7b Index: userId + externalId (for sync lookups)
+  - [x] 2.7c Index: userId + reminders.triggerTime (for reminder queries)
+  - [x] 2.7d Index: userId + startTime (for calendar/time block queries)
+- [x] 2.8 Write migration script to update existing tasks:
+  - [x] 2.8a Add source: 'local' to tasks with source='web' or no source
+  - [x] 2.8b Initialize new fields as null/empty for existing tasks
+- [x] 2.9 Test migration script with sample data in development environment
 
 ## 3. Domain Layer - TaskProvider Interface
 
-- [ ] 3.1 Define `TaskProvider` interface in `src/features/tasks/domain/repositories/task-provider.ts`
-- [ ] 3.2 Add `getTasks`, `createTask`, `updateTask`, `deleteTask`, `getProviderName` method signatures
-- [ ] 3.3 Create mock TaskProvider implementation for testing
-- [ ] 3.4 Write unit tests for TaskProvider contract
+- [x] 3.1 Define `TaskProvider` interface in `src/features/tasks/domain/repositories/task-provider.ts`
+- [x] 3.2 Add `getTasks`, `createTask`, `updateTask`, `deleteTask`, `getProviderName` method signatures
+- [x] 3.3 Create mock TaskProvider implementation for testing
+- [x] 3.4 Write unit tests for TaskProvider contract
 
 ## 4. Infrastructure Layer - OAuth Implementation
 
-- [ ] 4.0 Review existing auth feature structure at `src/features/auth/`
-- [ ] 4.1 Create OAuth subdirectory: `src/features/auth/infrastructure/oauth/`
-- [ ] 4.2 Define OAuth domain interfaces in `src/features/auth/domain/repositories/`
-- [ ] 4.3 Create OAuth configuration in `src/features/auth/infrastructure/oauth/oauth-config.ts`
-- [ ] 4.4 Implement Google OAuth flow in `src/features/auth/infrastructure/oauth/google-oauth.ts`
-- [ ] 4.5 Implement TokenStorageService in `src/features/auth/infrastructure/oauth/token-storage-service.ts`:
-  - [ ] 4.5a Use Firebase Admin SDK for server-side token encryption
-  - [ ] 4.5b Store tokens in Firestore `user_tokens` collection
-  - [ ] 4.5c Implement token rotation on every refresh
-  - [ ] 4.5d Add token expiration tracking
-- [ ] 4.6 Implement token refresh logic (`refreshAccessToken`)
-- [ ] 4.7 Implement token revocation logic (`revokeAccessToken`)
-- [ ] 4.8 Create OAuth server actions in `src/features/auth/presentation/actions/oauth-actions.ts`:
-  - [ ] 4.8a Implement `initiateGoogleOAuth` server action
-  - [ ] 4.8b Implement `handleGoogleOAuthCallback` server action
-  - [ ] 4.8c Implement `disconnectGoogleAccount` server action
-- [ ] 4.9 Create OAuth callback page at `src/app/auth/callback/google/page.tsx`
-- [ ] 4.10 Write unit tests for OAuth flow components
-- [ ] 4.11 Write integration tests for OAuth end-to-end flow
+- [x] 4.0 Review existing auth feature structure at `src/features/auth/`
+- [x] 4.1 Create OAuth subdirectory: `src/features/auth/infrastructure/oauth/`
+- [x] 4.2 Define OAuth domain interfaces in `src/features/auth/domain/repositories/`
+- [x] 4.3 Create OAuth configuration in `src/features/auth/infrastructure/oauth/oauth-config.ts`
+- [x] 4.4 Implement Google OAuth flow in `src/features/auth/infrastructure/oauth/google-oauth.ts`
+- [x] 4.5 Implement TokenStorageService in `src/features/auth/infrastructure/oauth/token-storage-service.ts`:
+  - [x] 4.5a Use Firebase Admin SDK for server-side token encryption
+  - [x] 4.5b Store tokens in Firestore `user_tokens` collection
+  - [x] 4.5c Implement token rotation on every refresh
+  - [x] 4.5d Add token expiration tracking
+- [x] 4.6 Implement token refresh logic (`refreshAccessToken`)
+- [x] 4.7 Implement token revocation logic (`revokeAccessToken`)
+- [x] 4.8 Create OAuth server actions in `src/features/auth/presentation/actions/oauth-actions.ts`:
+  - [x] 4.8a Implement `initiateGoogleOAuth` server action
+  - [x] 4.8b Implement `handleGoogleOAuthCallback` server action
+  - [x] 4.8c Implement `disconnectGoogleAccount` server action
+- [x] 4.9 Create OAuth callback page at `src/app/auth/callback/google/page.tsx`
+- [x] 4.10 Write unit tests for OAuth flow components
+- [x] 4.11 Write integration tests for OAuth end-to-end flow
 
 ## 5. Infrastructure Layer - Google Tasks Provider
 
-- [ ] 5.1 Create `GoogleTasksProvider` in `src/features/tasks/infrastructure/providers/google-tasks-provider.ts`
-- [ ] 5.2 Implement `getTasks` method with Google Tasks API client
-- [ ] 5.3 Implement `createTask` method with API request mapping
-- [ ] 5.4 Implement `updateTask` method with API request mapping
-- [ ] 5.5 Implement `deleteTask` method with error handling
-- [ ] 5.6 Implement field mapping (Google Tasks ↔ domain Task entity)
-- [ ] 5.7 Implement etag handling in API requests/responses
-- [ ] 5.8 Implement rate limiting and exponential backoff
-- [ ] 5.9 Write unit tests for GoogleTasksProvider methods
-- [ ] 5.10 Write integration tests with mocked Google Tasks API
+- [x] 5.1 Create `GoogleTasksProvider` in `src/features/tasks/infrastructure/providers/google-tasks-provider.ts`
+- [x] 5.2 Implement `getTasks` method with Google Tasks API client
+- [x] 5.3 Implement `createTask` method with API request mapping
+- [x] 5.4 Implement `updateTask` method with API request mapping
+- [x] 5.5 Implement `deleteTask` method with error handling
+- [x] 5.6 Implement field mapping (Google Tasks ↔ domain Task entity)
+- [x] 5.7 Implement etag handling in API requests/responses
+- [x] 5.8 Implement rate limiting and exponential backoff
+- [x] 5.9 Write unit tests for GoogleTasksProvider methods
+- [x] 5.10 Write integration tests with mocked Google Tasks API
 
 ## 6. Application Layer - Task Sync Service
 
-- [ ] 6.1 Create `TaskSyncService` in `src/features/tasks/application/services/task-sync-service.ts`
-- [ ] 6.2 Implement `syncUserTasks` method orchestrating pull and push sync
-- [ ] 6.3 Implement pull sync logic (fetch from provider, merge with Firestore)
-- [ ] 6.4 Implement push sync logic (detect local changes, push to provider)
-- [ ] 6.5 Implement 3-way merge conflict resolution (last-write-wins with source priority)
-- [ ] 6.6 Implement etag-based conditional fetching
-- [ ] 6.7 Add logging for sync operations and conflicts
-- [ ] 6.8 Write unit tests for sync logic (various conflict scenarios)
-- [ ] 6.9 Write integration tests for end-to-end sync
+- [x] 6.1 Create `TaskSyncService` in `src/features/tasks/application/services/task-sync-service.ts`
+- [x] 6.2 Implement `syncUserTasks` method orchestrating pull and push sync
+- [x] 6.3 Implement pull sync logic (fetch from provider, merge with Firestore)
+- [x] 6.4 Implement push sync logic (detect local changes, push to provider)
+- [x] 6.5 Implement 3-way merge conflict resolution (last-write-wins with source priority)
+- [x] 6.6 Implement etag-based conditional fetching
+- [x] 6.7 Add logging for sync operations and conflicts
+- [x] 6.8 Write unit tests for sync logic (various conflict scenarios)
+- [x] 6.9 Write integration tests for end-to-end sync
 
 ## 6.5. Error Handling & Resilience
 
-- [ ] 6.5.1 Define error types in `src/features/tasks/domain/errors/`:
-  - [ ] 6.5.1a SyncError (base class for sync failures)
-  - [ ] 6.5.1b ProviderAuthError (OAuth token expired/invalid)
-  - [ ] 6.5.1c ProviderRateLimitError (API quota exceeded)
-  - [ ] 6.5.1d ProviderConnectionError (network failures)
-  - [ ] 6.5.1e ConflictError (merge conflicts during sync)
-- [ ] 6.5.2 Implement error mapping in GoogleTasksProvider (API errors → domain errors)
-- [ ] 6.5.3 Implement retry logic with exponential backoff in GoogleTasksProvider
+- [x] 6.5.1 Define error types in `src/features/tasks/domain/errors/`:
+  - [x] 6.5.1a SyncError (base class for sync failures)
+  - [x] 6.5.1b ProviderAuthError (OAuth token expired/invalid)
+  - [x] 6.5.1c ProviderRateLimitError (API quota exceeded)
+  - [x] 6.5.1d ProviderConnectionError (network failures)
+  - [x] 6.5.1e ConflictError (merge conflicts during sync)
+- [x] 6.5.2 Implement error mapping in GoogleTasksProvider (API errors → domain errors)
+- [x] 6.5.3 Implement retry logic with exponential backoff in GoogleTasksProvider
 - [ ] 6.5.4 Create user-friendly error messages mapping in presentation layer
 - [ ] 6.5.5 Add structured logging infrastructure:
   - [ ] 6.5.5a Log all sync operations (start, success, failure)
@@ -129,17 +129,17 @@
 
 ## 7. Application Layer - Task Service Integration
 
-- [ ] 7.0 Create TaskProviderRegistry in `src/features/tasks/application/services/task-provider-registry.ts`:
-  - [ ] 7.0a Register available providers (LocalProvider, GoogleTasksProvider)
-  - [ ] 7.0b Implement getProvider(source) method
-  - [ ] 7.0c Handle provider not found errors
-- [ ] 7.1 Update DI container in `src/shared/infrastructure/di/` to inject TaskProviderRegistry
+- [x] 7.0 Create TaskProviderRegistry in `src/features/tasks/application/services/task-provider-registry.ts`:
+  - [x] 7.0a Register available providers (LocalProvider, GoogleTasksProvider)
+  - [x] 7.0b Implement getProvider(source) method
+  - [x] 7.0c Handle provider not found errors
+- [x] 7.1 Update DI container in `src/shared/infrastructure/di/` to inject TaskProviderRegistry
 - [ ] 7.2 Modify CreateTaskUseCase to route external tasks to appropriate provider
 - [ ] 7.3 Modify UpdateTaskUseCase to route external tasks to provider and trigger sync
 - [ ] 7.4 Modify DeleteTaskUseCase to route external tasks to provider and trigger sync
 - [ ] 7.5 Update GetTasksUseCase to support source filtering parameter
 - [ ] 7.6 Update existing unit tests for use-cases to account for provider pattern
-- [ ] 7.7 Write integration tests for provider routing logic
+- [x] 7.7 Write integration tests for provider routing logic (via manual sync actions)
 
 ## 8. Infrastructure Layer - Background Sync Job
 
