@@ -1,10 +1,27 @@
 # Implementation Tasks: Google Tasks Integration MVP
 
+## MVP Scope Decisions
+
+**Architecture Decisions:**
+- ✅ Time Blocks: Use existing `startTime/endTime` fields (no new timeBlock object)
+- ✅ Functions: Standard `/functions/` directory structure
+- ✅ Sync Frequency: Fixed 3-minute intervals (user-configurable deferred to post-MVP)
+- ✅ Calendar Views: Day view only for MVP (week/month views deferred)
+- ✅ Notifications: In-app notifications (primary) + bot notifications via existing chatbot integration
+
+**Deferred to Post-MVP:**
+- Week and month calendar views
+- Email and native push notifications
+- User-configurable sync intervals
+- Additional platform integrations (Notion, Asana, etc.)
+
+---
+
 ## 1. Project Setup & Dependencies
 
 - [ ] 1.1 Install Google Tasks API client library (`googleapis`)
 - [ ] 1.2 Install Firebase Functions SDK (`firebase-functions`, `firebase-admin`)
-- [ ] 1.3 Initialize Firebase Functions directory structure (`firebase init functions`)
+- [ ] 1.3 Initialize Firebase Functions in standard `/functions/` directory (`firebase init functions`)
 - [ ] 1.4 Configure TypeScript for Functions (tsconfig.json in functions/)
 - [ ] 1.5 Set up Functions environment variables using Firebase config
 - [ ] 1.6 Configure Google Cloud Console project with Tasks API enabled
@@ -18,7 +35,7 @@
 - [ ] 2.0 Review existing Task schema (already has startTime/endTime fields and source enum)
 - [ ] 2.1 Extend Task entity source enum from ["web", "chatbot"] to ["web", "chatbot", "local", "google-tasks"]
 - [ ] 2.2 Add new fields to Task entity: externalId (string), externalEtag (string), lastSyncedAt (Timestamp)
-- [ ] 2.3 Clarify timeBlock strategy: use existing startTime/endTime OR create new timeBlock object
+- [ ] 2.3 DECISION: Use existing startTime/endTime fields for time blocks (no new timeBlock object needed)
 - [ ] 2.4 Add reminders array field to Task entity: [{ id, triggerTime, notified }]
 - [ ] 2.5 Create Firestore collection `user_tokens` with schema for OAuth tokens
 - [ ] 2.6 Write Firestore security rules for `user_tokens` collection:
@@ -147,23 +164,23 @@
 - [ ] 9.8 Add loading indicators during OAuth and sync operations
 - [ ] 9.9 Write component tests for integration settings
 
-## 10. Presentation Layer - Time Blocking UI
+## 10. Presentation Layer - Time Blocking UI (MVP: Day View Only)
 
 - [ ] 10.0 Review existing UI components in `src/components/ui/` (calendar, dialog, date-picker)
-- [ ] 10.1 Decide: extend existing calendar component OR build custom time block calendar
-- [ ] 10.2 Create `TimeBlockPicker` component with start/end time inputs (use existing form components)
-- [ ] 10.3 Update task detail dialog (CreateEditTaskDialog) to include time block assignment
-- [ ] 10.4 Display time block badges on task list items in TaskList component
-- [ ] 10.5 Create calendar view component with day/week/month modes:
-  - [ ] 10.5a Implement calendar day view showing hourly time blocks
-  - [ ] 10.5b Implement calendar week view with time blocks
-  - [ ] 10.5c Implement calendar month view with time block indicators
+- [ ] 10.1 Create `TimeBlockPicker` component with start/end time inputs (use existing form components)
+- [ ] 10.2 Update task detail dialog (CreateEditTaskDialog) to include time block assignment
+- [ ] 10.3 Display time block badges on task list items in TaskList component
+- [ ] 10.4 Create "Day View" calendar component showing hourly time blocks:
+  - [ ] 10.4a Build day view grid with hourly slots (e.g., 6am-11pm)
+  - [ ] 10.4b Display time-blocked tasks in their scheduled slots
+  - [ ] 10.4c Add date navigation (previous/next day, jump to date)
+- [ ] 10.5 Create "Today" view component showing current day's scheduled tasks
 - [ ] 10.6 Add time block conflict detection logic
 - [ ] 10.7 Add visual indicators for time block conflicts (overlapping times)
-- [ ] 10.8 Create "Today" view component showing current day's scheduled tasks
-- [ ] 10.9 Implement timezone conversion for display (use date-fns)
-- [ ] 10.10 Add time block editing/removal functionality in task dialog
-- [ ] 10.11 Write component tests for time blocking UI components
+- [ ] 10.8 Implement timezone conversion for display (use date-fns)
+- [ ] 10.9 Add time block editing/removal functionality in task dialog
+- [ ] 10.10 Write component tests for time blocking UI components
+- [ ] 10.11 (Post-MVP) Week and month calendar views deferred to future iteration
 
 ## 11. Presentation Layer - Task Filtering & Source Labels
 
@@ -193,10 +210,10 @@
   - [ ] 13.3b Define notification schema (userId, taskId, title, message, read, createdAt)
   - [ ] 13.3c Write Firestore security rules for notifications collection
 - [ ] 13.4 Implement notification creation logic for due reminders
-- [ ] 13.5 (Optional) Integrate with existing chatbot API for bot notifications:
-  - [ ] 13.5a Check if user has connected chatbot
+- [ ] 13.5 Integrate with existing chatbot API for bot notifications:
+  - [ ] 13.5a Check if user has connected chatbot (query chatbot sessions)
   - [ ] 13.5b Send reminder notification via chatbot webhook/API
-  - [ ] 13.5c Handle bot notification failures gracefully
+  - [ ] 13.5c Handle bot notification failures gracefully (fallback to in-app only)
 - [ ] 13.6 Implement marking reminders as notified (update reminder.notified = true)
 - [ ] 13.7 Add retry logic for failed notification delivery
 - [ ] 13.8 Configure Cloud Scheduler job (every 1 minute)
@@ -266,15 +283,18 @@
 - [ ] 16.9 Monitor production logs for errors
 - [ ] 16.10 Announce feature to users
 
-## 17. Post-MVP Considerations (Not in Scope)
+## 17. Post-MVP Considerations (Deferred to Future Iterations)
 
-- [ ] 17.1 Notion database integration
-- [ ] 17.2 Asana integration
-- [ ] 17.3 Microsoft To Do integration
-- [ ] 17.4 Google Calendar meeting sync
-- [ ] 17.5 Push notifications for reminders (in-app)
-- [ ] 17.6 AI-powered task scheduling suggestions
-- [ ] 17.7 Advanced conflict resolution with user prompt
-- [ ] 17.8 Drag-and-drop time block rescheduling
-- [ ] 17.9 Multi-account support per user
-- [ ] 17.10 Webhook-based sync when platform supports it
+- [ ] 17.1 Calendar week and month views for time blocking
+- [ ] 17.2 Email notifications for reminders
+- [ ] 17.3 Native push notifications (iOS/Android)
+- [ ] 17.4 User-configurable sync intervals (currently fixed at 3 minutes)
+- [ ] 17.5 Notion database integration
+- [ ] 17.6 Asana integration
+- [ ] 17.7 Microsoft To Do integration
+- [ ] 17.8 Google Calendar meeting sync
+- [ ] 17.9 AI-powered task scheduling suggestions
+- [ ] 17.10 Advanced conflict resolution with user prompt
+- [ ] 17.11 Drag-and-drop time block rescheduling
+- [ ] 17.12 Multi-account support per user
+- [ ] 17.13 Webhook-based sync when platform supports it
