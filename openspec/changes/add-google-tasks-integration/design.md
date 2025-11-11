@@ -174,12 +174,19 @@ interface Task {
 **Flow**:
 1. Cloud Function runs every minute
 2. Query tasks where `reminders.triggerTime <= now + 1min` AND `reminders.notified = false`
-3. Send notification (email or push)
-4. Mark reminder as notified
+3. Create in-app notification in Firestore `notifications` collection
+4. (Optional) Send bot notification if user has chatbot connected
+5. Mark reminder as notified
 
-**Notification Channel (MVP)**:
-- Email notifications using Firebase Extensions (Trigger Email) or SendGrid
-- Push notifications deferred to post-MVP
+**Notification Channels (MVP)**:
+- **Primary**: In-app notifications with bell icon in header/navbar
+  - Real-time updates using Firestore listeners
+  - Unread count badge
+  - Notification panel with task links
+- **Secondary (Optional)**: Bot notifications via existing chatbot integration
+  - Leverage existing chatbot API for push notifications
+  - Fallback gracefully if chatbot not connected
+- **Deferred to Post-MVP**: Native push notifications, email notifications
 
 ## Risks / Trade-offs
 
@@ -255,7 +262,8 @@ interface Task {
    - **Recommendation**: Flatten for MVP; show list name as a tag; full hierarchy post-MVP
 
 4. **Reminder Delivery**: Email only, or also in-app notifications?
-   - **Recommendation**: Email for MVP (simpler); in-app bell icon shows recent reminders
+   - **Decision**: In-app notifications for MVP (better UX); optional bot notifications via existing chatbot integration
+   - Email and native push notifications deferred to post-MVP
 
 5. **Multi-Account Support**: Can a user connect multiple Google accounts?
    - **Recommendation**: Single account for MVP; multi-account post-MVP

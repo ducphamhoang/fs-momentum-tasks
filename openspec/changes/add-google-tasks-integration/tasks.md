@@ -187,14 +187,21 @@
 ## 13. Infrastructure Layer - Reminder Notification System
 
 - [ ] 13.1 Create Cloud Function for reminder checks in `functions/src/check-reminders.ts`
-- [ ] 13.2 Implement Firestore query for due reminders
-- [ ] 13.3 Integrate email notification service (Firebase Extensions or SendGrid)
-- [ ] 13.4 Create email templates for reminder notifications
-- [ ] 13.5 Implement notification sending logic with retry
-- [ ] 13.6 Implement marking reminders as notified
-- [ ] 13.7 Configure Cloud Scheduler job (every 1 minute)
-- [ ] 13.8 Test reminder function locally with Firebase emulator
-- [ ] 13.9 Deploy reminder Cloud Function to staging
+- [ ] 13.2 Implement Firestore query for due reminders (query tasks with reminders.triggerTime <= now)
+- [ ] 13.3 Create in-app notification system:
+  - [ ] 13.3a Create Firestore collection `notifications` for storing in-app notifications
+  - [ ] 13.3b Define notification schema (userId, taskId, title, message, read, createdAt)
+  - [ ] 13.3c Write Firestore security rules for notifications collection
+- [ ] 13.4 Implement notification creation logic for due reminders
+- [ ] 13.5 (Optional) Integrate with existing chatbot API for bot notifications:
+  - [ ] 13.5a Check if user has connected chatbot
+  - [ ] 13.5b Send reminder notification via chatbot webhook/API
+  - [ ] 13.5c Handle bot notification failures gracefully
+- [ ] 13.6 Implement marking reminders as notified (update reminder.notified = true)
+- [ ] 13.7 Add retry logic for failed notification delivery
+- [ ] 13.8 Configure Cloud Scheduler job (every 1 minute)
+- [ ] 13.9 Test reminder function locally with Firebase emulator
+- [ ] 13.10 Deploy reminder Cloud Function to staging
 
 ## 14. Presentation Layer - Reminder Management UI
 
@@ -207,6 +214,19 @@
 - [ ] 14.7 Create user settings for default reminder preferences
 - [ ] 14.8 Implement auto-adding default reminders to new time blocks
 - [ ] 14.9 Write component tests for reminder UI
+
+## 14.5. Presentation Layer - In-App Notification UI
+
+- [ ] 14.5.1 Create notification bell icon component in header/navbar
+- [ ] 14.5.2 Display unread notification count badge on bell icon
+- [ ] 14.5.3 Create notifications dropdown panel showing recent notifications
+- [ ] 14.5.4 Implement notification list with task titles and reminder times
+- [ ] 14.5.5 Add "Mark as Read" functionality for notifications
+- [ ] 14.5.6 Add "Clear All" functionality for notifications
+- [ ] 14.5.7 Add click handler to navigate to task when notification is clicked
+- [ ] 14.5.8 Implement real-time notification updates using Firestore listeners
+- [ ] 14.5.9 Add notification sound/toast for new reminders (optional)
+- [ ] 14.5.10 Write component tests for notification UI
 
 ## 15. Testing & Quality Assurance
 
