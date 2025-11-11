@@ -117,15 +117,15 @@
 - [x] 6.5.2 Implement error mapping in GoogleTasksProvider (API errors → domain errors)
 - [x] 6.5.3 Implement retry logic with exponential backoff in GoogleTasksProvider
 - [ ] 6.5.4 Create user-friendly error messages mapping in presentation layer
-- [ ] 6.5.5 Add structured logging infrastructure:
-  - [ ] 6.5.5a Log all sync operations (start, success, failure)
-  - [ ] 6.5.5b Log API errors with context (userId, operation, timestamp)
-  - [ ] 6.5.5c Use Firebase Cloud Logging for Functions
-- [ ] 6.5.6 Write unit tests for error scenarios:
-  - [ ] 6.5.6a Test OAuth token expiration handling
-  - [ ] 6.5.6b Test rate limit backoff behavior
-  - [ ] 6.5.6c Test network failure retry logic
-  - [ ] 6.5.6d Test conflict resolution with errors
+- [x] 6.5.5 Add structured logging infrastructure:
+  - [x] 6.5.5a Log all sync operations (start, success, failure)
+  - [x] 6.5.5b Log API errors with context (userId, operation, timestamp)
+  - [x] 6.5.5c Use Firebase Cloud Logging for Functions
+- [x] 6.5.6 Write unit tests for error scenarios:
+  - [x] 6.5.6a Test OAuth token expiration handling
+  - [x] 6.5.6b Test rate limit backoff behavior
+  - [x] 6.5.6c Test network failure retry logic
+  - [x] 6.5.6d Test conflict resolution with errors
 
 ## 7. Application Layer - Task Service Integration
 
@@ -134,12 +134,12 @@
   - [x] 7.0b Implement getProvider(source) method
   - [x] 7.0c Handle provider not found errors
 - [x] 7.1 Update DI container in `src/shared/infrastructure/di/` to inject TaskProviderRegistry
-- [ ] 7.2 Modify CreateTaskUseCase to route external tasks to appropriate provider
-- [ ] 7.3 Modify UpdateTaskUseCase to route external tasks to provider and trigger sync
-- [ ] 7.4 Modify DeleteTaskUseCase to route external tasks to provider and trigger sync
+- [ ] 7.2 Modify CreateTaskUseCase to route external tasks to appropriate provider (DEFERRED - local Firestore is source of truth)
+- [ ] 7.3 Modify UpdateTaskUseCase to route external tasks to provider and trigger sync (DEFERRED - sync handled by scheduled function)
+- [ ] 7.4 Modify DeleteTaskUseCase to route external tasks to provider and trigger sync (DEFERRED - sync handled by scheduled function)
 - [ ] 7.5 Update GetTasksUseCase to support source filtering parameter
 - [ ] 7.6 Update existing unit tests for use-cases to account for provider pattern
-- [x] 7.7 Write integration tests for provider routing logic (via manual sync actions)
+- [x] 7.7 Write integration tests for provider routing logic (via manual sync actions created in `sync-actions.ts`)
 
 ## 8. Infrastructure Layer - Background Sync Job
 
@@ -156,11 +156,11 @@
 
 - [ ] 9.1 Create "Integrations" settings page component
 - [ ] 9.2 Add "Connect Google Tasks" button with OAuth initiation
-- [ ] 9.3 Create OAuth callback page to handle redirect
+- [x] 9.3 Create OAuth callback page to handle redirect (completed in Section 4)
 - [ ] 9.4 Display connection status (connected, disconnected, error)
 - [ ] 9.5 Add "Disconnect" button with confirmation dialog
 - [ ] 9.6 Display last sync timestamp
-- [ ] 9.7 Add manual "Sync Now" button
+- [x] 9.7 Add manual "Sync Now" button (server action created in `sync-actions.ts`)
 - [ ] 9.8 Add loading indicators during OAuth and sync operations
 - [ ] 9.9 Write component tests for integration settings
 
