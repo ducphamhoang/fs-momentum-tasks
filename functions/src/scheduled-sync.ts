@@ -1,4 +1,4 @@
-import * as functions from "firebase-functions";
+import * as functions from "firebase-functions/v1";
 import * as admin from "firebase-admin";
 import { GoogleTasksProvider } from "../../src/features/tasks/infrastructure/providers/google-tasks-provider";
 import { TaskSyncServiceImpl } from "../../src/features/tasks/application/services/task-sync-service";
@@ -33,7 +33,7 @@ interface UserToken {
  */
 export const scheduledTaskSync = functions.pubsub
   .schedule("every 3 minutes")
-  .onRun(async (context) => {
+  .onRun(async () => {
     const startTime = Date.now();
     functions.logger.info("[ScheduledSync] Starting scheduled sync", {
       timestamp: new Date().toISOString(),
@@ -149,7 +149,7 @@ export const scheduledTaskSync = functions.pubsub
  */
 export const manualTaskSync = functions.https.onCall(async (data, context) => {
   // Ensure user is authenticated
-  if (!context.auth) {
+  if (!context || !context.auth) {
     throw new functions.https.HttpsError(
       "unauthenticated",
       "User must be authenticated to trigger sync"

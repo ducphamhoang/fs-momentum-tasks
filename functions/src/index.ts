@@ -1,4 +1,4 @@
-import * as functions from "firebase-functions";
+import * as functions from "firebase-functions/v1";
 import * as admin from "firebase-admin";
 
 // Initialize Firebase Admin SDK
@@ -12,3 +12,6 @@ export const helloWorld = functions.https.onRequest((request, response) => {
 
 // Export scheduled sync functions
 export { scheduledTaskSync, manualTaskSync } from "./scheduled-sync";
+
+// Export reminder check functions
+export { checkReminders, manualReminderCheck } from "./check-reminders";

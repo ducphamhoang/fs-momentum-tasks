@@ -8,6 +8,7 @@ import { TaskList } from "./TaskList";
 import { CreateEditTaskDialog } from "./CreateEditTaskDialog";
 import { AIPrioritizationDialog } from "./AIPrioritizationDialog";
 import { TaskFilter, type TaskFilters } from "./components/TaskFilter";
+import { NotificationBell } from "@/features/notifications/presentation/NotificationBell";
 import { prioritizeTasksAction } from "../application/actions";
 import { useToast } from "@/hooks/use-toast";
 import type { PrioritizeTasksOutput } from "@/ai/flows/ai-prioritize-tasks";
@@ -87,6 +88,7 @@ export function Dashboard({ initialTasks }: DashboardProps) {
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold tracking-tight">Your Momentum</h1>
         <div className="flex items-center gap-2">
+            <NotificationBell />
             <Button onClick={handleAIPrioritize} variant="outline" disabled={isAILoading}>
                 {isAILoading ? <Loader className="mr-2 h-4 w-4" /> : <Sparkles className="mr-2 h-4 w-4" />}
                 Prioritize with AI
