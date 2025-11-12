@@ -4,6 +4,7 @@ import { AuthApplicationServiceImpl } from "@/features/auth/application/services
 import { TaskApplicationServiceImpl } from "@/features/tasks/application/services/task-service";
 import { TaskProviderRegistryImpl } from "@/features/tasks/application/services/task-provider-registry";
 import { TaskSyncServiceImpl } from "@/features/tasks/application/services/task-sync-service";
+import { ReminderServiceImpl } from "@/features/tasks/application/services/reminder-service";
 import { FirestoreVerificationCodeRepository } from "@/features/chatbot-integration/infrastructure/persistence/firestore-verification-code-repository";
 import { FirestoreChatbotSessionRepository } from "@/features/chatbot-integration/infrastructure/persistence/firestore-chatbot-session-repository";
 import { JsonwebtokenService } from "@/features/chatbot-integration/infrastructure/jwt/jsonwebtoken-service";
@@ -20,6 +21,7 @@ class DIContainer {
   private _taskApplicationService: TaskApplicationServiceImpl | null = null;
   private _taskProviderRegistry: TaskProviderRegistryImpl | null = null;
   private _taskSyncService: TaskSyncServiceImpl | null = null;
+  private _reminderService: ReminderServiceImpl | null = null;
 
   // Chatbot integration services
   private _verificationCodeRepository: FirestoreVerificationCodeRepository | null = null;
@@ -71,6 +73,13 @@ class DIContainer {
       this._taskSyncService = new TaskSyncServiceImpl(this.taskRepository);
     }
     return this._taskSyncService;
+  }
+
+  get reminderService(): ReminderServiceImpl {
+    if (!this._reminderService) {
+      this._reminderService = new ReminderServiceImpl(this.taskRepository);
+    }
+    return this._reminderService;
   }
 
   // Chatbot integration services
