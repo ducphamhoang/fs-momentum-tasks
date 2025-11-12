@@ -44,9 +44,10 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { Loader } from "@/components/ui/loader";
 
-import { CreateTaskSchema, type Task, type CreateTaskInput } from "../domain/task";
+import { CreateTaskSchema, type Task, type CreateTaskInput, type Reminder } from "../domain/task";
 import { revalidateTasks } from "../application/actions";
 import { TimeBlockPicker } from "./components/TimeBlockPicker";
+import { ReminderManager } from "./components/ReminderManager";
 
 
 interface CreateEditTaskDialogProps {
@@ -64,6 +65,7 @@ export function CreateEditTaskDialog({
   const { user } = useUser();
   const firestore = useFirestore();
   const [isLoading, setIsLoading] = useState(false);
+  const [reminders, setReminders] = useState<Reminder[]>([]);
   const isEditMode = !!taskToEdit;
 
   const form = useForm<CreateTaskInput>({
@@ -99,6 +101,7 @@ export function CreateEditTaskDialog({
         endTime: taskToEdit.endTime || "",
         timeEstimate: taskToEdit.timeEstimate || "",
       });
+      setReminders(taskToEdit.reminders || []);
     } else if (isOpen && !isEditMode) {
         form.reset({
             title: "",
@@ -109,6 +112,7 @@ export function CreateEditTaskDialog({
             endTime: "",
             timeEstimate: "",
         });
+        setReminders([]);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, taskToEdit, isEditMode]);
@@ -132,6 +136,7 @@ export function CreateEditTaskDialog({
       userId: user.uid,
       updatedAt: serverTimestamp(),
       dueDate: values.dueDate ? Timestamp.fromDate(values.dueDate) : null,
+      reminders: reminders,
     };
 
     try {
@@ -267,6 +272,14 @@ export function CreateEditTaskDialog({
               onEndTimeChange={(time) => form.setValue("endTime", time)}
               disabled={isLoading}
             />
+
+            <ReminderManager
+              reminders={reminders}
+              onRemindersChange={setReminders}
+              startTime={form.watch("startTime")}
+              dueDate={form.watch("dueDate")}
+            />
+
              <FormField
               control={form.control}
               name="timeEstimate"

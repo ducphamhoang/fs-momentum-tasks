@@ -5,12 +5,12 @@
 Implementation of Google Tasks integration MVP for fs-momentum-tasks, providing OAuth authentication, bidirectional task synchronization, time blocking, and reminder features.
 
 **Branch:** `claude/google-tasks-integration-011CV3KnYmV4zoB4AGUHhs5N`
-**Overall Progress:** ~95% Complete
+**Overall Progress:** ~98% Complete
 **Last Updated:** 2025-11-12
 
 ---
 
-## ✅ Completed Sections (1-13)
+## ✅ Completed Sections (1-14.5)
 
 ### Section 1-2: Project Setup & Database Schema ✅
 - Installed googleapis, firebase-functions, firebase-admin
@@ -160,21 +160,55 @@ Implementation of Google Tasks integration MVP for fs-momentum-tasks, providing 
 
 **Completion:** 8/10 tasks (chatbot integration, local testing, and deployment deferred)
 
+### Section 14: Reminder Management UI ✅
+**Files Created:**
+- `src/features/tasks/presentation/components/ReminderManager.tsx` - Reminder management component
+
+**Features:**
+- Display list of configured reminders with trigger times
+- Show reminder status (pending vs. notified vs. past)
+- Delete reminder functionality with confirmation dialog
+- Auto-reminder info message when time block is set
+- Color-coded status badges (Bell icon for pending, BellOff for notified/past)
+- Time formatting for better UX
+- Integrated into CreateEditTaskDialog
+
+**Completion:** 7/9 tasks (custom reminder picker and component tests deferred)
+
+### Section 14.5: In-App Notification UI ✅
+**Files Created:**
+- `src/features/notifications/domain/repositories/notification-repository.ts` - Repository interface
+- `src/features/notifications/infrastructure/persistence/firestore-notification-repository.ts` - Firestore implementation
+- `src/features/notifications/presentation/NotificationBell.tsx` - Notification bell component
+
+**Features:**
+- Notification bell icon with unread count badge in Dashboard header
+- Real-time notification updates using Firestore listeners
+- Dropdown panel showing recent notifications
+- Mark as read / Mark all as read functionality
+- Delete individual / Clear all notifications
+- Formatted timestamps (e.g., "2 hours ago")
+- Visual distinction for unread notifications
+- Scrollable notification list (max 400px height)
+- Empty state message when no notifications
+
+**Completion:** 8/10 tasks (notification sound/toast and component tests deferred)
+
 ---
 
 ## 🚧 Remaining Work
 
-### Section 14: End-to-End Testing (Not Started)
-**Tasks:**
-- Test OAuth flow end-to-end
-- Test sync flow with real Google Tasks API (use test account)
-- Test time blocking UI
-- Test reminder generation
-- Test notifications
+### Section 15: Testing & Quality Assurance (Partially Complete)
+**Tasks (Deferred):**
+- Manual testing with real Google Tasks account
+- End-to-end tests for OAuth, sync, time blocking, and reminders
+- Component tests for UI components
+- Security rules verification
+- Coverage target validation
 
 **Estimated Effort:** 2-4 hours
 
-### Section 15: Documentation (Not Started)
+### Section 16: Documentation (Not Started)
 **Tasks:**
 - User documentation (how to connect Google Tasks)
 - Developer documentation (architecture, adding new providers)
@@ -376,6 +410,8 @@ firebase functions:config:set google.client_secret="<your-client-secret>"
 - [x] User can filter tasks by source and schedule
 - [x] Time blocks show conflict warnings
 - [x] User receives reminders 15min & 5min before tasks (Section 13)
+- [x] User can view and manage reminders in task dialog (Section 14)
+- [x] User receives in-app notifications for due reminders (Section 14.5)
 - [ ] User can disconnect Google Tasks
 - [ ] All tests passing
 - [ ] Documentation complete
@@ -392,6 +428,6 @@ firebase functions:config:set google.client_secret="<your-client-secret>"
 ---
 
 **Last Updated:** 2025-11-12
-**Status:** Ready for Section 14 (Reminder Management UI)
+**Status:** Ready for Section 15/16 (Testing & Documentation)
 **Build:** ✓ Passing
 **Branch:** `claude/google-tasks-integration-011CV3KnYmV4zoB4AGUHhs5N`
