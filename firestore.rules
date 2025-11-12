@@ -79,5 +79,48 @@ service cloud.firestore {
       allow update: if isExistingOwner(userId) && resource.data.userId == request.resource.data.userId;
       allow delete: if isExistingOwner(userId);
     }
+
+    /**
+     * @description Secures OAuth tokens for external platform integrations.
+     * @path /user_tokens/{tokenId}
+     * @security Server-only access - clients cannot read or write tokens directly
+     * @deny (all) All client access is denied for security
+     * @principle OAuth tokens are highly sensitive and should only be accessed by Firebase Admin SDK
+     */
+    match /user_tokens/{tokenId} {
+      // All client access denied - tokens are managed server-side only via Firebase Admin SDK
+      allow read: if false;
+      allow write: if false;
+    }
+
+    /**
+     * @description Secures in-app notification documents.
+     * @path /notifications/{notificationId}
+     * @allow (read) User can read their own notifications
+     * @allow (list) User can list their own notifications
+     * @allow (update) User can update their own notifications (mark as read)
+     * @allow (delete) User can delete their own notifications
+     * @deny (create) Clients cannot create notifications (server-side only)
+     * @principle Notifications are created by Cloud Functions, users can read/update/delete their own
+     */
+    match /notifications/{notificationId} {
+      function isNotificationOwner() {
+        return request.auth != null && request.auth.uid == resource.data.userId;
+      }
+
+      // Users can read and list their own notifications
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow list: if request.auth != null;
+
+      // Users can update their own notifications (e.g., mark as read)
+      allow update: if isNotificationOwner() &&
+                       request.resource.data.userId == resource.data.userId;
+
+      // Users can delete their own notifications
+      allow delete: if isNotificationOwner();
+
+      // Only server can create notifications
+      allow create: if false;
+    }
   }
 }

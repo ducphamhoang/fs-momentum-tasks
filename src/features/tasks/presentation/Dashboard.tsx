@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Plus, Sparkles } from "lucide-react";
 import { type Task } from "../domain/task";
 import { Button } from "@/components/ui/button";
 import { TaskList } from "./TaskList";
 import { CreateEditTaskDialog } from "./CreateEditTaskDialog";
 import { AIPrioritizationDialog } from "./AIPrioritizationDialog";
+import { TaskFilter, type TaskFilters } from "./components/TaskFilter";
 import { prioritizeTasksAction } from "../application/actions";
 import { useToast } from "@/hooks/use-toast";
 import type { PrioritizeTasksOutput } from "@/ai/flows/ai-prioritize-tasks";
@@ -22,7 +23,37 @@ export function Dashboard({ initialTasks }: DashboardProps) {
   const [taskToEdit, setTaskToEdit] = useState<Task | null>(null);
   const [isAILoading, setIsAILoading] = useState(false);
   const [aiResult, setAiResult] = useState<PrioritizeTasksOutput | null>(null);
+  const [filters, setFilters] = useState<TaskFilters>({
+    source: "all",
+    timeBlock: "all",
+  });
   const { toast } = useToast();
+
+  // Filter tasks based on active filters
+  const filteredTasks = useMemo(() => {
+    return initialTasks.filter((task) => {
+      // Filter by source
+      if (filters.source !== "all") {
+        const taskSource = task.source || "local";
+        if (taskSource !== filters.source) {
+          return false;
+        }
+      }
+
+      // Filter by time block
+      if (filters.timeBlock !== "all") {
+        const isScheduled = !!(task.startTime && task.endTime);
+        if (filters.timeBlock === "scheduled" && !isScheduled) {
+          return false;
+        }
+        if (filters.timeBlock === "unscheduled" && isScheduled) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }, [initialTasks, filters]);
 
   const handleEdit = (task: Task) => {
     setTaskToEdit(task);
@@ -65,8 +96,20 @@ export function Dashboard({ initialTasks }: DashboardProps) {
             </Button>
         </div>
       </div>
-      
-      <TaskList tasks={initialTasks} onEdit={handleEdit} />
+
+      {/* Task Filters */}
+      <div className="mb-6">
+        <TaskFilter filters={filters} onFiltersChange={setFilters} />
+      </div>
+
+      {/* Task count */}
+      {filteredTasks.length !== initialTasks.length && (
+        <div className="mb-4 text-sm text-muted-foreground">
+          Showing {filteredTasks.length} of {initialTasks.length} tasks
+        </div>
+      )}
+
+      <TaskList tasks={filteredTasks} onEdit={handleEdit} />
 
       <CreateEditTaskDialog
         isOpen={isCreateOpen}

@@ -1,6 +1,6 @@
 "use client";
 
-import { Clock, MoreHorizontal, Trash2, Edit, Calendar } from "lucide-react";
+import { Clock, MoreHorizontal, Trash2, Edit, Calendar, CheckSquare, MessageSquare, Laptop, Cloud } from "lucide-react";
 import { format } from "date-fns";
 import { type Task } from "../domain/task";
 import {
@@ -35,8 +35,25 @@ const importanceVariantMap: { [key: string]: "destructive" | "secondary" | "defa
     low: "default",
 };
 
+// Helper function to get source icon and label
+function getSourceInfo(source?: string) {
+  switch (source) {
+    case "google-tasks":
+      return { icon: CheckSquare, label: "Google Tasks", color: "text-blue-600" };
+    case "chatbot":
+      return { icon: MessageSquare, label: "Chatbot", color: "text-purple-600" };
+    case "web":
+      return { icon: Laptop, label: "Web", color: "text-green-600" };
+    case "local":
+    default:
+      return { icon: Cloud, label: "Local", color: "text-gray-600" };
+  }
+}
+
 export function TaskItem({ task, onToggleComplete, onDelete, onEdit }: TaskItemProps) {
   const isMeeting = task.startTime && task.endTime;
+  const sourceInfo = getSourceInfo(task.source);
+  const SourceIcon = sourceInfo.icon;
 
   return (
     <Card className={cn("transition-opacity", task.isCompleted && "opacity-50")}>
@@ -75,9 +92,15 @@ export function TaskItem({ task, onToggleComplete, onDelete, onEdit }: TaskItemP
           </DropdownMenuContent>
         </DropdownMenu>
       </CardHeader>
-      {(task.dueDate || isMeeting || task.importanceLevel) && (
+      {(task.dueDate || isMeeting || task.importanceLevel || task.source) && (
         <CardFooter className="flex-wrap gap-2 p-4 pt-0">
             <Badge variant={importanceVariantMap[task.importanceLevel] || 'default'} className="capitalize">{task.importanceLevel}</Badge>
+            {task.source && task.source !== "local" && (
+                <Badge variant="outline" className="gap-1">
+                    <SourceIcon className={cn("h-3 w-3", sourceInfo.color)} />
+                    <span className={sourceInfo.color}>{sourceInfo.label}</span>
+                </Badge>
+            )}
             {task.dueDate && (
                 <Badge variant="outline" className="gap-1">
                     <Calendar className="h-3 w-3" />

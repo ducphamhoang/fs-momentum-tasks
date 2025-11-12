@@ -2,6 +2,9 @@ import { FirebaseAuthRepository } from "@/features/auth/infrastructure/auth/fire
 import { FirestoreTaskRepository } from "@/features/tasks/infrastructure/persistence/firestore-task-repository";
 import { AuthApplicationServiceImpl } from "@/features/auth/application/services/auth-service";
 import { TaskApplicationServiceImpl } from "@/features/tasks/application/services/task-service";
+import { TaskProviderRegistryImpl } from "@/features/tasks/application/services/task-provider-registry";
+import { TaskSyncServiceImpl } from "@/features/tasks/application/services/task-sync-service";
+import { ReminderServiceImpl } from "@/features/tasks/application/services/reminder-service";
 import { FirestoreVerificationCodeRepository } from "@/features/chatbot-integration/infrastructure/persistence/firestore-verification-code-repository";
 import { FirestoreChatbotSessionRepository } from "@/features/chatbot-integration/infrastructure/persistence/firestore-chatbot-session-repository";
 import { JsonwebtokenService } from "@/features/chatbot-integration/infrastructure/jwt/jsonwebtoken-service";
@@ -16,6 +19,9 @@ class DIContainer {
   // Task services
   private _taskRepository: FirestoreTaskRepository | null = null;
   private _taskApplicationService: TaskApplicationServiceImpl | null = null;
+  private _taskProviderRegistry: TaskProviderRegistryImpl | null = null;
+  private _taskSyncService: TaskSyncServiceImpl | null = null;
+  private _reminderService: ReminderServiceImpl | null = null;
 
   // Chatbot integration services
   private _verificationCodeRepository: FirestoreVerificationCodeRepository | null = null;
@@ -51,6 +57,29 @@ class DIContainer {
       this._taskApplicationService = new TaskApplicationServiceImpl(this.taskRepository);
     }
     return this._taskApplicationService;
+  }
+
+  get taskProviderRegistry(): TaskProviderRegistryImpl {
+    if (!this._taskProviderRegistry) {
+      this._taskProviderRegistry = new TaskProviderRegistryImpl();
+      // Note: Providers should be registered externally (e.g., in bootstrap/initialization)
+      // The registry starts empty and providers are added as needed
+    }
+    return this._taskProviderRegistry;
+  }
+
+  get taskSyncService(): TaskSyncServiceImpl {
+    if (!this._taskSyncService) {
+      this._taskSyncService = new TaskSyncServiceImpl(this.taskRepository);
+    }
+    return this._taskSyncService;
+  }
+
+  get reminderService(): ReminderServiceImpl {
+    if (!this._reminderService) {
+      this._reminderService = new ReminderServiceImpl(this.taskRepository);
+    }
+    return this._reminderService;
   }
 
   // Chatbot integration services
